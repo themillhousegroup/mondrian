@@ -26,7 +26,5 @@ seq(bintraySettings:_*)
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
-scalariformSettings
-
 net.virtualvoid.sbt.graph.Plugin.graphSettings
 
