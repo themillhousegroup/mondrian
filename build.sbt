@@ -8,8 +8,8 @@ scalaVersion := "2.11.7"
 organization := "com.themillhousegroup"
 
 libraryDependencies ++= Seq(
+    "org.reactivemongo"       %%  "play2-reactivemongo"     % "0.11.9",
     "com.typesafe.play"       %%  "play"                    % "2.4.6"           % "provided",
-    "org.reactivemongo"       %%  "play2-reactivemongo"     % "0.11.7.play24"   % "provided",
     "io.netty"                %  "netty"                    % "3.10.4.Final"    % "provided",
     "org.mockito"             %   "mockito-all"             % "1.10.19"         % "test",
     "org.specs2"              %%  "specs2"                  % "2.3.13"          % "test"
