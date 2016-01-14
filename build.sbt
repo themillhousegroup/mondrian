@@ -21,7 +21,7 @@ resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/reposit
 
 jacoco.settings
 
-publishArtifact in (Compile, packageDoc) := false
+// publishArtifact in (Compile, packageDoc) := false
 
 seq(bintraySettings:_*)
 
