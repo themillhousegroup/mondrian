@@ -7,12 +7,15 @@ scalaVersion := "2.11.7"
 
 organization := "com.themillhousegroup"
 
+val targetPlayReactiveMongoVersion = "0.11.9"
+
 libraryDependencies ++= Seq(
-    "org.reactivemongo"       %%  "play2-reactivemongo"     % "0.11.9",
-    "com.typesafe.play"       %%  "play"                    % "2.4.6"           % "provided",
-    "io.netty"                %  "netty"                    % "3.10.4.Final"    % "provided",
-    "org.mockito"             %   "mockito-all"             % "1.10.19"         % "test",
-    "org.specs2"              %%  "specs2"                  % "2.3.13"          % "test"
+    "org.reactivemongo"       %%  "play2-reactivemongo"         % targetPlayReactiveMongoVersion,
+    "com.typesafe.play"       %%  "play"                        % "2.4.6"           % "provided",
+    "io.netty"                %  "netty"                        % "3.10.4.Final"    % "provided",
+    "org.mockito"             %   "mockito-all"                 % "1.10.19"         % "test",
+    "org.specs2"              %%  "specs2"                      % "2.3.13"          % "test",
+    "com.themillhousegroup"   %% "play2-reactivemongo-mocks"    % s"${targetPlayReactiveMongoVersion}_0.4.14"   % "test"
 )
 
 resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",

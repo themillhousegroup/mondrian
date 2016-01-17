@@ -6,6 +6,8 @@ import play.api.libs.json.Json
 case class MongoId(val $oid: String)
 
 /** Provides a Play JSON `Format` for working with MongoId instances */
-object MongoJson {
+class MongoJson {
   implicit val mongoIdFormat = Json.format[MongoId]
 }
+
+object MongoJson extends MongoJson
