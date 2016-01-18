@@ -58,13 +58,12 @@ A `MongoEntity` simply includes an `_id: Option[MongoId]` field like this:
 ```
 
 #### Define a Play-JSON `Format` for your new object
-Perhaps something like this:
+You can extend `MongoJson` to get the implicit conversion for the `MongoId`; perhaps something like this:
 
 ```
 import play.api.libs.json.Json
 
-object VehicleJson {
-  import com.themillhousegroup.mondrian.MongoJson.mongoIdFormat
+object VehicleJson extends MongoJson {
   import ManufacturerJson.manufacturerFormat
   
   val vehicleFormat = Json.format[Vehicle]
