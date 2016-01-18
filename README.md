@@ -28,6 +28,12 @@ Bring in the library by adding the following to your Play project's ```build.sbt
 
 Once you have __mondrian__ added to your Play project, you can start using it like this:
 
+#### Enable the **ReactiveMongoModule** in your `application.conf`
+You may already have this if you've been using the vanilla Reactive Mongo Module:
+```
+play.modules.enabled += "play.modules.reactivemongo.ReactiveMongoModule" 
+```
+
 #### Define the `mongodb.uri` in your `application.conf`
 If you're coming from Play-ReactiveMongo you'll already have something appropriate in your `application.conf`, e.g.:
 
