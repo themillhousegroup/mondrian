@@ -42,5 +42,12 @@ class MongoServiceSpec extends Specification with MongoMocks with Mockito {
         Duration(2, "seconds")) must beNone
 
     }
+
+    "return a Nil from a listAll on an empty collection" in {
+      Await.result(
+        testMongoService.listAll,
+        Duration(2, "seconds")) must beEmpty
+
+    }
   }
 }
