@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
     "io.netty"                %  "netty"                        % "3.10.4.Final"    % "provided",
     "org.mockito"             %   "mockito-all"                 % "1.10.19"         % "test",
     "org.specs2"              %%  "specs2"                      % "2.3.13"          % "test",
-    "com.themillhousegroup"   %% "play2-reactivemongo-mocks"    % s"${targetPlayReactiveMongoVersion}_0.4.14"   % "test"
+    "com.themillhousegroup"   %% "play2-reactivemongo-mocks"    % s"${targetPlayReactiveMongoVersion}_0.4.20"   % "test"
 )
 
 resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
