@@ -19,7 +19,7 @@ Bring in the library by adding the following to your Play project's ```build.sbt
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "mondrian" % "0.1.3"
+     "com.themillhousegroup" %% "mondrian" % "0.2.12"
    )
 
 ```
@@ -74,14 +74,13 @@ object VehicleJson extends MongoJson {
 
 This `Service` joins together your domain object, the name of the MongoDB collection that will hold it, and the `Format` to read/write it.
 
-If you just want basic CRUD operations defined for your model object, you just need three lines:  
+If you just want basic CRUD operations defined for your model object, you just need ONE line of code:  
 
 ```
 import com.themillhousegroup.mondrian._
+import models.VehicleJson._ 
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles") {
-  val fmt=VehicleJson.vehicleFormat
-}
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")(vehicleFormat) 
 ```  
 
 But of course you can add extra methods that are useful; for example:
@@ -89,9 +88,9 @@ But of course you can add extra methods that are useful; for example:
 
 ```
 import com.themillhousegroup.mondrian._
+import models.VehicleJson._ 
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles") {
-  val fmt=VehicleJson.vehicleFormat
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")(vehicleFormat) 
   
   def findVehiclesFirstSoldIn(year:Int):Future[List[Vehicle]] = {
     listWhere(Json.obj("yearFirstOffered" -> year))
