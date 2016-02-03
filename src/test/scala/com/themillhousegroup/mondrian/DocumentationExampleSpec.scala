@@ -7,26 +7,8 @@ import org.specs2.mock.Mockito
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
-
-// This is the example from the README.md - checking that it works!
-
-case class Manufacturer(val name:String, val country:String)
-
-case class Vehicle(
-  	val _id: Option[MongoId],
-  	val name: String,
-  	val manufacturer:Manufacturer,
-  	val yearFirstOffered:Int,
-  	val yearLastOffered:Option[Int]) extends MongoEntity
-
-object ManufacturerJson {
-  implicit val manufacturerFormat = Json.format[Manufacturer]
-}
-
-object VehicleJson extends MongoJson {
-	import ManufacturerJson.manufacturerFormat
-  implicit val converter = Json.format[Vehicle]
-}
+import com.themillhousegroup.mondrian.test.Vehicle
+import com.themillhousegroup.mondrian.test.VehicleJson
 
 class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.converter)
 
