@@ -57,7 +57,7 @@ A `MongoEntity` simply includes an `_id: Option[MongoId]` field like this:
   	val yearLastOffered:Option[Int]) extends MongoEntity
 ```
 
-#### Define a Play-JSON `Format` for your new object
+#### Define an `implicit` Play-JSON `Format` for your new object 
 You can extend `MongoJson` to get the implicit conversion for the `MongoId`; perhaps something like this:
 
 ```
@@ -66,7 +66,7 @@ import play.api.libs.json.Json
 object VehicleJson extends MongoJson {
   import ManufacturerJson.manufacturerFormat
   
-  val vehicleFormat = Json.format[Vehicle]
+  implicit val vehicleFormat = Json.format[Vehicle]
 }
 ```
 
@@ -74,23 +74,25 @@ object VehicleJson extends MongoJson {
 
 This `Service` joins together your domain object, the name of the MongoDB collection that will hold it, and the `Format` to read/write it.
 
-If you just want basic CRUD operations defined for your model object, you just need ONE line of code:  
+If you just want basic CRUD operations defined for your model object, you just need ONE line of code (plus the appropriate imports):  
 
 ```
 import com.themillhousegroup.mondrian._
 import models.VehicleJson._ 
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles")(vehicleFormat) 
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")
 ```  
 
-But of course you can add extra methods that are useful; for example:
+Because of the `VehicleJson._` import, the compiler is able to find the implicit JSON `Format` it needs. You
+can supply it explicitly if you prefer, as shown next.
+Of course you can add extra methods that are useful; for example:
 
 
 ```
 import com.themillhousegroup.mondrian._
-import models.VehicleJson._ 
+import models.VehicleJson 
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles")(vehicleFormat) 
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) 
   
   def findVehiclesFirstSoldIn(year:Int):Future[List[Vehicle]] = {
     listWhere(Json.obj("yearFirstOffered" -> year))
