@@ -11,14 +11,15 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.language.existentials
 import play.api.libs.iteratee.Enumerator
 
-abstract class TypedMongoService[T <: MongoEntity](collectionName: String) {
+abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) {
   lazy val reactiveMongoApi = current.injector.instanceOf[ReactiveMongoApi]
 
   implicit val defaultContext = play.api.libs.concurrent.Execution.defaultContext
 
   val readPreference = ReadPreference.nearest
 
-  implicit val fmt: Format[T]
+//  implicit val fmt: Format[T] 
+
 
   protected def theCollection: JSONCollection = reactiveMongoApi.db.collection[JSONCollection](collectionName)
 
