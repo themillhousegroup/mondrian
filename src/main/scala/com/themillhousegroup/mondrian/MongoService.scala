@@ -76,6 +76,11 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     }
   }
 
+  /** Inserts or Updates each 'T' in the provided collection */
+  def save(objs: Iterable[T]): Future[Iterable[Boolean]] = {
+    Future.sequence(objs.map(save))
+  }
+
   /** Returns a Some(T) if successful where the _id, if it was a None, is now a Some(id) */
   def saveAndPopulate(obj: T): Future[Option[T]] = {
     save(obj).flatMap { ok =>
@@ -86,6 +91,12 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
         Future.successful(None)
       }
     }
+  }
+
+  /** Inserts or Updates each 'T' in the provided collection,
+    * returning a Some(T) if successful where the _id, if it was a None, is now a Some(id) */
+  def saveAndPopulate(objs: Iterable[T]): Future[Iterable[Option[T]]] = {
+    Future.sequence(objs.map(saveAndPopulate))
   }
 
   /**
