@@ -49,5 +49,10 @@ class MongoServiceSpec extends Specification with MongoMocks with Mockito {
         Duration(2, "seconds")) must beEmpty
 
     }
+
+    "return a Nil from a enumerateWhere on an empty collection" in {
+      val e = testMongoService.enumerateWhere(Json.obj())
+      e must not beNull
+    }
   }
 }
