@@ -26,11 +26,12 @@ class MongoServiceSpec extends Specification with MongoMocks with Mockito with W
     "be able to delete an object by an id in the _id($oid = xxx) scheme" in {
       givenMongoRemoveIsOK(mockCollection, Json.obj("_id" -> Json.obj("$oid" -> "f00")))
 
-      val r = await(testMongoService.deleteById("f00"))
-
-      r must not beNull
-
-      r must beTrue
+      await(testMongoService.deleteById("f00")) must beTrue
     }
+
+//    "be able to count all the items in the collection" in {
+//
+//      await(testMongoService.countAll) must beEqualTo(3)
+//    }
   }
 }
