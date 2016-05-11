@@ -7,89 +7,30 @@ import org.specs2.mock.Mockito
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
+import com.themillhousegroup.mondrian.test.Waiting
 
-case class TestMongoEntity(_id: Option[MongoId], name:String) extends MongoEntity
-
-
-object TestMongoEntityJson extends MongoJson {
-  implicit val converter = Json.format[TestMongoEntity]
-}
-
-class MongoServiceSpec extends Specification with MongoMocks with Mockito {
+class MongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting {
 
   val mockReactiveApi = mock[ReactiveMongoApi]
   val mockCollection = mockedCollection("testcollection")
   mockReactiveApi.db returns mockDB
 
-  givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
 
-  val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection")(TestMongoEntityJson.converter) {
+
+  val testMongoService = new MongoService("testcollection") {
     override lazy val reactiveMongoApi = mockReactiveApi
   }
 
-  "TypedMongoService" should {
-    "use an implicit Format to do internal JSON conversion" in {
-      Await.result(
-        testMongoService.findById("abc123"),
-        Duration(2, "seconds")) must beNone
+  "MongoService" should {
 
-    }
+    "be able to delete an object by an id in the _id($oid = xxx) scheme" in {
+      givenMongoRemoveIsOK(mockCollection, Json.obj("_id" -> Json.obj("$oid" -> "f00")))
 
-    "return a None from a findOne on an empty collection" in {
-      Await.result(
-        testMongoService.findOne(TestMongoEntity(None, "foo")),
-        Duration(2, "seconds")) must beNone
+      val r = await(testMongoService.deleteById("f00"))
 
-    }
+      r must not beNull
 
-    "return a Nil from a listAll on an empty collection" in {
-      Await.result(
-        testMongoService.listAll,
-        Duration(2, "seconds")) must beEmpty
-
-    }
-
-    "return a Nil from a enumerateWhere on an empty collection" in {
-      val e = testMongoService.enumerateWhere(Json.obj())
-      e must not beNull
-    }
-  }
-}
-
-class MongoServiceImplicitFormatSpec extends Specification with MongoMocks with Mockito {
-
-  val mockReactiveApi = mock[ReactiveMongoApi]
-  val mockCollection = mockedCollection("testcollection")
-  mockReactiveApi.db returns mockDB
-
-  givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
-
-	import TestMongoEntityJson._
-
-  val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection") {
-    override lazy val reactiveMongoApi = mockReactiveApi
-  }
-
-  "TypedMongoService using an implicit Format" should {
-    "use an implicit Format to do internal JSON conversion" in {
-      Await.result(
-        testMongoService.findById("abc123"),
-        Duration(2, "seconds")) must beNone
-
-    }
-
-    "return a None from a findOne on an empty collection" in {
-      Await.result(
-        testMongoService.findOne(TestMongoEntity(None, "foo")),
-        Duration(2, "seconds")) must beNone
-
-    }
-
-    "return a Nil from a listAll on an empty collection" in {
-      Await.result(
-        testMongoService.listAll,
-        Duration(2, "seconds")) must beEmpty
-
+      r must beTrue
     }
   }
 }
