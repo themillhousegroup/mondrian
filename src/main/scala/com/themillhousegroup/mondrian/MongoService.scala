@@ -32,7 +32,9 @@ abstract class MongoService(collectionName: String) {
 
   private def idSelector(id: String): JsObject = Json.obj("_id" -> Json.obj("$oid" -> id))
 
-  def deleteById(id: String): Future[Boolean] = {
-    theCollection.remove(idSelector(id)).map(_.ok)
+  def deleteWhere(jsQuery: JsValue): Future[Boolean] = {
+    theCollection.remove(jsQuery.as[JsObject]).map(_.ok)
   }
+
+  def deleteById(id: String): Future[Boolean] = deleteWhere(idSelector(id))
 }
