@@ -26,7 +26,11 @@ object MongoId {
 }
 
 /** Represents the particular format of the Mongo "primary key", the `$oid` */
-case class MongoId(val $oid: String)
+case class MongoId(val `$oid`: String) {
+  lazy val timestamp = MongoId.timestamp(`$oid`)
+
+  lazy val isValid = MongoId.isValid(`$oid`)
+}
 
 /** Provides a Play JSON `Format` for working with MongoId instances */
 class MongoJson {
