@@ -19,7 +19,7 @@ Bring in the library by adding the following to your Play project's ```build.sbt
 
 ```
    libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "mondrian" % "0.2.12"
+     "com.themillhousegroup" %% "mondrian" % "0.2.21"
    )
 
 ```
@@ -100,7 +100,7 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
 }
 ```  
 
-In the above example, the `listWhere(JsValue)` function from the superclass is being used, but there are many more that you can utilize, for example `findOne(JsValue)`, `cursorWhere(JsValue)` and `enumerateWhere(JsValue)`. Check `MongoService.scala` for the details.
+In the above example, the `listWhere(JsValue)` function from the superclass is being used, but there are many more that you can utilize, for example `findOne(JsValue)`, `cursorWhere(JsValue)` and `enumerateWhere(JsValue)`. See the next section for the details.
 
 #### Inject your new `Service` into your `Controller` classes
 
@@ -113,6 +113,9 @@ class VehicleController @Inject()(val vehicleService:VehicleService) extends Con
 }
 
 ```
+
+## Available Methods
+TBA
 
 
 ## Credits
