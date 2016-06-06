@@ -7,19 +7,28 @@ An extra layer supplying the classic CRUD operations for Play-ReactiveMongo obje
 ## Installation
 
 Bring in the library by adding the following to your Play project's ```build.sbt```. 
-
-  - The release repository: 
+The release repository: 
 
 ```
    resolvers ++= Seq(
      "Millhouse Bintray"  at "http://dl.bintray.com/themillhousegroup/maven"
    )
 ```
-  - The dependency itself: 
+And the dependency itself: 
+
+##### For Play 2.4.x:
 
 ```
    libraryDependencies ++= Seq(
      "com.themillhousegroup" %% "mondrian" % "0.2.21"
+   )
+
+```
+##### For Play 2.5.x:
+
+```
+   libraryDependencies ++= Seq(
+     "com.themillhousegroup" %% "mondrian" % "0.3.30"
    )
 
 ```
