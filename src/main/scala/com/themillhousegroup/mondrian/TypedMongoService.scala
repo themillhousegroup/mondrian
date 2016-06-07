@@ -22,12 +22,12 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     }
   }
 
-  def listWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Future[List[T]] = {
-    cursorWhere(jsQuery, size, startFrom, sortWith).collect[List]()
+  def listWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Future[Seq[T]] = {
+    cursorWhere(jsQuery, size, startFrom, sortWith).collect[Seq]()
   }
 
-  def listAll: Future[List[T]] = listAll(None, None)
-  def listAll(size: Option[Int] = None, startFrom: Option[Int] = None): Future[List[T]] = listWhere(all, size, startFrom)
+  def listAll: Future[Seq[T]] = listAll(None, None)
+  def listAll(size: Option[Int] = None, startFrom: Option[Int] = None): Future[Seq[T]] = listWhere(all, size, startFrom)
 
   def enumerateWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Enumerator[T] = {
     cursorWhere(jsQuery, size, startFrom, sortWith).enumerate()
@@ -71,7 +71,16 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     save(obj).flatMap { ok =>
       if (ok) {
         val json = Json.toJson(obj)(fmt)
-        findOne(json)
+        //findOne(json)
+		listWhere(json).map { result =>
+			if (result.size < 2) {
+				result.headOption
+			} else {
+				// TODO: There are multiple objects that look like the one 
+				// we have saved and so we need to "try harder" to find the new one...
+				None
+			}
+		}
       } else {
         Future.successful(None)
       }
