@@ -40,7 +40,22 @@ class MongoIdSpec extends Specification {
 
     "return a Some if a timestamp can be extracted" in {
       MongoId.timestamp("570eee4ae137520167c1ed9c") must beSome[Long].like { case l =>
-        l must beEqualTo(91287268)
+        l must beEqualTo(1460596298)
+      }
+    }
+
+    "return a Some if a timestamp can be extracted, containing the correct time in millis" in {
+			// Example exactly as per:
+			// https://docs.mongodb.com/manual/reference/method/ObjectId.getTimestamp/
+      MongoId.timestamp("507c7f79bcf86cd7994f6c0e") must beSome[Long].like { case l =>
+        val d = new java.util.Date(l * 1000)
+
+				val df = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+				df.setTimeZone(java.util.TimeZone.getTimeZone("UTC"))
+
+				val formatted = df.format(d)
+				
+				formatted  must beEqualTo("2012-10-15T21:26:17")
       }
     }
   }

@@ -20,7 +20,7 @@ object MongoId {
 
   def timestamp(candidate:String):Option[Long] = {
     withValidId(candidate).map { oid =>
-      java.lang.Long.parseLong(oid.substring(0, 7), 16)
+      java.lang.Long.parseLong(oid.substring(0, 8), 16)
     }
   }
 }
