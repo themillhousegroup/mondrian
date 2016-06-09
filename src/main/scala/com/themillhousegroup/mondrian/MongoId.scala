@@ -26,10 +26,21 @@ object MongoId {
 }
 
 /** Represents the particular format of the Mongo "primary key", the `$oid` */
-case class MongoId(val `$oid`: String) {
+case class MongoId(val `$oid`: String) extends Ordered[MongoId] {
   lazy val timestamp = MongoId.timestamp(`$oid`)
 
   lazy val isValid = MongoId.isValid(`$oid`)
+
+  def compare(that:MongoId):Int = {
+    val o = for {
+      thisTs <- this.timestamp
+      thatTs <- that.timestamp
+    } yield {
+      (thisTs - thatTs).toInt
+    }
+
+    o.getOrElse(0)
+  }
 }
 
 /** Provides a Play JSON `Format` for working with MongoId instances */
