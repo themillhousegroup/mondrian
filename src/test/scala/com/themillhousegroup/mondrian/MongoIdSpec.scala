@@ -59,4 +59,38 @@ class MongoIdSpec extends Specification {
       }
     }
   }
+
+  "MongoId Instances" should {
+
+    val m1 = MongoId("123abc123abc123def123def")
+    val m2 = MongoId("123abd123abc123def123def")
+
+    "Support being compared with each other using < and >" in {
+
+      m1 < m2 must beTrue
+
+      m2 > m1 must beTrue
+
+      m1 > m2 must beFalse
+
+      m2 < m1 must beFalse
+    }
+
+    "Support being compared with each other using <= and >=" in {
+
+      m1 <= m2 must beTrue
+
+      m2 >= m1 must beTrue
+
+      m1 <= m1 must beTrue
+
+      m2 <= m1 must beFalse
+    }
+
+    "Support being placed into an ordered list" in {
+      val l = Seq(m2, m1)
+
+      l.sorted must beEqualTo(Seq(m1, m2))
+    }
+  }
 }
