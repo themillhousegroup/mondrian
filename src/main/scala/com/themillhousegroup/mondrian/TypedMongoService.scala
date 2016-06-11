@@ -47,12 +47,23 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
 
   private def idSelector(id: String): JsObject = Json.obj("_id" -> Json.obj("$oid" -> id))
 
+  /**
+   * Attempt to persist the given object.
+   * If the _id field is None, an `insert` operation will be used, and the database will generate the ID.
+   * If you need to know this ID, use the `saveAndPopulate` method, which will return a copy of your `obj`
+   * with the `_id` field populated.
+   * If the _id is a Some, then an `update` will be performed. The `upsert` flag will be passed
+   * to the database, so that if there is no existing object, it will be inserted instead of updated.
+   *
+   * @param obj
+   * @return a Future containing a Boolean representing the success of the save operation
+   */
   def save(obj: T): Future[Boolean] = {
     val json = Json.toJson(obj)(fmt).as[JsObject]
 
     val op = obj._id.fold(theCollection.insert(json)) { id =>
       val selector = idSelector(id.$oid)
-      theCollection.update(selector, json)
+      theCollection.update(selector, json, reactiveMongoApi.db.connection.options.writeConcern, true)
     }
 
     op.map { err =>
