@@ -19,7 +19,7 @@ object TestMongoEntityJson extends MongoJson {
 class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting {
 
   val mockReactiveApi = mock[ReactiveMongoApi]
-  val mockCollection = mockedCollection("testcollection")(mockDB)
+  val mockCollection = mockedCollection("testcollection")
   mockReactiveApi.db returns mockDB
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
@@ -51,8 +51,9 @@ class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito w
 }
 
 class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks with Mockito with Waiting {
+
   val mockReactiveApi = mock[ReactiveMongoApi]
-  val mockCollection = mockedCollection("testcollection")(mockDB)
+  val mockCollection = mockedCollection("testcollection")
   mockReactiveApi.db returns mockDB
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)

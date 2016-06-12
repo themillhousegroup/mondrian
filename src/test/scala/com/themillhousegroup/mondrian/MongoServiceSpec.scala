@@ -12,7 +12,7 @@ import com.themillhousegroup.mondrian.test.Waiting
 class MongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting {
 
   val mockReactiveApi = mock[ReactiveMongoApi]
-  val mockCollection = mockedCollection("testcollection")(mockDB)
+  val mockCollection = mockedCollection("testcollection")
   mockReactiveApi.db returns mockDB
 
 

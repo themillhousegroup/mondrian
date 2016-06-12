@@ -14,7 +14,7 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
 
 class DocumentationExampleSpec extends Specification with MongoMocks with Mockito {
   val mockReactiveApi = mock[ReactiveMongoApi]
-  val mockCollection = mockedCollection("vehicles")(mockDB)
+  val mockCollection = mockedCollection("vehicles")
   mockReactiveApi.db returns mockDB
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
