@@ -83,19 +83,25 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
       if (ok) {
         val json = Json.toJson(obj)(fmt)
         //findOne(json)
-		listWhere(json).map { result =>
-			if (result.size < 2) {
-				result.headOption
+		listWhere(json).map { results =>
+			if (results.size < 2) {
+				results.headOption
 			} else {
-				// TODO: There are multiple objects that look like the one 
-				// we have saved and so we need to "try harder" to find the new one...
-				None
+        findMostRecentlyInsertedObject(results)
 			}
 		}
       } else {
         Future.successful(None)
       }
     }
+  }
+
+  // There are multiple objects that look like the one
+  // we have saved and so we need to "try harder" to find the new one..
+  private def findMostRecentlyInsertedObject(candidates:Seq[T]):Option[T] = {
+    candidates.sortBy { candidate =>
+      candidate._id.getOrElse(MongoId.dummyMongoId)
+    }.lastOption
   }
 
   /** Inserts or Updates each 'T' in the provided collection,

@@ -23,6 +23,8 @@ object MongoId {
       java.lang.Long.parseLong(oid.substring(0, 8), 16)
     }
   }
+
+  lazy val dummyMongoId = MongoId("000000000000000000000000")
 }
 
 /** Represents the particular format of the Mongo "primary key", the `$oid` */
