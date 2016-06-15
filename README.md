@@ -126,15 +126,25 @@ class VehicleController @Inject()(val vehicleService:VehicleService) extends Con
 ## Available Methods
 
 #### Public Methods
-As soon as you extend `TypedMongoService[T]`, your `Service` will have the following **public** methods available:
+As soon as you extend `TypedMongoService[T]`, your `Service` will have the following **public** methods available. All of them return `Future`s of some sort, in keeping with the Reactive philosophy.
+
+##### Creation / Update
+
+Method | Returns | Description
+--- | ---
+`save(obj:T)` | `Future[Boolean]` | Persist `obj`. If its `_id` is `None`, will **insert**. Else will **update**
+`save(objs:Iterable[T])` | `Future[Iterable[Boolean]` | Persist each of the  `objs` as per `save`
+`saveAndPopulate(obj:T)` | `Future[Option[T]]` | Persist `obj` as per `save`, and return it with the `_id` field populated
+`save(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`
+`saveIfNew(obj:T)` | `Future[Option[T]]` | If no similar object found, save `obj` as per `saveAndPopulate`. Otherwise, return the existing object from the collection
+
+##### Retrieval
 
 Method | Returns | Description
 --- | ---
 `countAll` | `Future[Int]` | Count the number of objects in the collection
 `countWhere(jsQuery:JsValue)` | `Future[Int]` | Count the number of matches for `jsQuery`
 `cursorWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Cursor[T]` | Returns a `reactivemongo.api.Cursor` of `jsQuery` matches
-`deleteById(id:String)` | `Future[Boolean]` | Delete the object identified by `id`
-`deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery`
 `enumerateWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Enumerator[T]` | Returns a `play.api.libs.iteratee.Enumerator` of `jsQuery` matches
 `findOne(jsQuery:JsValue)` | `Future[Option[T]]` | Attempt to find one object that matches `jsQuery`
 `findOne(example:T)` | `Future[Option[T]]` | Attempt to find one object that matches the `example`
@@ -142,11 +152,14 @@ Method | Returns | Description
 `listAll` | `Future[Seq[T]]` | Returns all in the collection
 `listAll(size: Option[Int] = None, startFrom: Option[Int] = None)` | `Future[Seq[T]]` | Returns all in the collection, paginated
 `listWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Future[Seq[T]]` | Returns `jsQuery` matches with optional pagination & sorting
-`save(obj:T)` | `Future[Boolean]` | Persist `obj`. If its `_id` is `None`, will **insert**. Else will **update**
-`save(objs:Iterable[T])` | `Future[Iterable[Boolean]` | Persist each of the  `objs` as per `save`
-`saveAndPopulate(obj:T)` | `Future[Option[T]]` | Persist `obj` as per `save`, and return it with the `_id` field populated
-`save(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`
-`saveIfNew(obj:T)` | `Future[Option[T]]` | If no similar object found, save `obj` as per `saveAndPopulate`. Otherwise, return the existing object from the collection
+
+##### Deletion
+
+Method | Returns | Description
+--- | ---
+`deleteById(id:String)` | `Future[Boolean]` | Delete the object identified by `id`
+`deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery`
+
 
 ## Credits
 
