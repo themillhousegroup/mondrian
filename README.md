@@ -161,6 +161,16 @@ Method | Returns | Description
 `deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery`
 
 
+#### Protected Methods
+Your `Service` that extends `TypedMongoService[T]` also gets access to `protected` methods to make writing additional `T`-specific methods easy:
+##### Retrieval
+
+Method | Returns | Description
+--- | ---
+`findAll` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for all objects in the collection
+`findWhere(jsQuery:JsValue)` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for matching objects in the collection
+
+
 ## Credits
 
 - [Play-ReactiveMongo](https://github.com/ReactiveMongo/Play-ReactiveMongo) does the hard work.
