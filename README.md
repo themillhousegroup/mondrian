@@ -109,6 +109,9 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
 }
 ```  
 
+Note how the query is built by using the [Play JSON library](https://www.playframework.com/documentation/2.5.x/ScalaJson) to create an object.
+
+
 In the above example, the `listWhere(JsValue)` function from the superclass is being used, but there are many more that you can utilize, for example `findOne(JsValue)`, `cursorWhere(JsValue)` and `enumerateWhere(JsValue)`. See the next section for the details.
 
 #### Inject your new `Service` into your `Controller` classes
