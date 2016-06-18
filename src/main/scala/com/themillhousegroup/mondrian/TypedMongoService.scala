@@ -123,4 +123,13 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
       }
     }
   }
+
+  /**
+   * Save the object, ensuring that after the save is done, only
+   * the newly-saved object satisfies the given condition - i.e.
+   * other matches of the condition will be deleted
+   */
+  def saveEnsuring(obj:T, condition:JsValue):Future[Boolean] = {
+    Future.failed(new NotImplementedError("This method isn't ready yet"))
+  }
 }
