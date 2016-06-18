@@ -109,6 +109,9 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
 }
 ```  
 
+Note how the query is built by using the [Play JSON library](https://www.playframework.com/documentation/2.5.x/ScalaJson) to create an object.
+
+
 In the above example, the `listWhere(JsValue)` function from the superclass is being used, but there are many more that you can utilize, for example `findOne(JsValue)`, `cursorWhere(JsValue)` and `enumerateWhere(JsValue)`. See the next section for the details.
 
 #### Inject your new `Service` into your `Controller` classes
@@ -159,6 +162,16 @@ Method | Returns | Description
 --- | ---
 `deleteById(id:String)` | `Future[Boolean]` | Delete the object identified by `id`
 `deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery`
+
+
+#### Protected Methods
+Your `Service` that extends `TypedMongoService[T]` also gets access to `protected` methods to make writing additional `T`-specific methods easy:
+##### Retrieval
+
+Method | Returns | Description
+--- | ---
+`findAll` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for all objects in the collection
+`findWhere(jsQuery:JsValue)` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for matching objects in the collection
 
 
 ## Credits
