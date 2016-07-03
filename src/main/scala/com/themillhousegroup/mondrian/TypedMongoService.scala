@@ -61,7 +61,9 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
   def save(obj: T): Future[Boolean] = {
     val json = Json.toJson(obj)(fmt).as[JsObject]
 
-    val op = obj._id.fold(theCollection.insert(json)) { id =>
+    val op = obj._id.fold {
+      theCollection.insert(json, reactiveMongoApi.db.connection.options.writeConcern)
+    } { id =>
       val selector = idSelector(id.$oid)
       theCollection.update(selector, json, reactiveMongoApi.db.connection.options.writeConcern, true)
     }
