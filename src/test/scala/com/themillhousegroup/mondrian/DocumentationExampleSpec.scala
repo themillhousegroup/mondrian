@@ -10,16 +10,14 @@ import scala.concurrent.Await
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
 import com.themillhousegroup.mondrian.test.{MockedReactiveApi, Vehicle, VehicleJson}
 
-class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.converter)
+class VehicleService(reactiveMongoApi:ReactiveMongoApi) extends TypedMongoService[Vehicle]("vehicles")(reactiveMongoApi)(VehicleJson.converter)
 
 class DocumentationExampleSpec extends Specification with MongoMocks with Mockito with MockedReactiveApi {
   val mockCollection = mockedCollection("vehicles")(mockDB)
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
 
-	val service = new VehicleService() {
-    override lazy val reactiveMongoApi = mockReactiveApi
-	}
+	val service = new VehicleService(mockReactiveApi)
 
   "Documentation Example" should {
     "work" in {

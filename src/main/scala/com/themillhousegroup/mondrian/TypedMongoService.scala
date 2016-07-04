@@ -11,7 +11,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import scala.language.existentials
 import play.api.libs.iteratee.Enumerator
 
-abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
+abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(override val reactiveMongoApi:ReactiveMongoApi)(implicit val fmt:Format[T]) extends MongoService(collectionName)(reactiveMongoApi) {
 
   /** The level of write concern to use for this collection; if not overridden, this will be the
     * ReactiveMongo connection-wide level as defined in MongoConnectionOptions - which can be globally set

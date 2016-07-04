@@ -21,14 +21,10 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     givenAnyMongoUpdateIsOK(mockCollection, true)
 
     val testMongoService = maybeOverriddenWriteConcern.fold {
-      new TypedMongoService[TestMongoEntity]("testcollection") {
-        override lazy val reactiveMongoApi:ReactiveMongoApi = self.mockReactiveApi
-      }
-
+      new TypedMongoService[TestMongoEntity]("testcollection")(self.mockReactiveApi){}
     } { writeConcern =>
 
-      new TypedMongoService[TestMongoEntity]("testcollection") {
-        override lazy val reactiveMongoApi:ReactiveMongoApi = self.mockReactiveApi
+      new TypedMongoService[TestMongoEntity]("testcollection")(self.mockReactiveApi) {
         override val defaultWriteConcern = writeConcern
       }
     }

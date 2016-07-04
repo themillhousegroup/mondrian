@@ -1,18 +1,15 @@
 package com.themillhousegroup.mondrian
 
 import reactivemongo.api._
-import play.modules.reactivemongo.json.collection._
-import play.modules.reactivemongo._
-import play.modules.reactivemongo.json._
-import play.api.Play.current
 import scala.concurrent.Future
-import play.api.libs.json.{ JsValue, JsObject, Json, Format }
+import play.api.libs.json.{ JsValue, JsObject, Json }
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.language.existentials
-import play.api.libs.iteratee.Enumerator
+import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json._
+import play.modules.reactivemongo.ReactiveMongoApi
 
-abstract class MongoService(collectionName: String) {
-  lazy val reactiveMongoApi = current.injector.instanceOf[ReactiveMongoApi]
+abstract class MongoService(collectionName: String)(val reactiveMongoApi:ReactiveMongoApi) {
 
   implicit val defaultContext = play.api.libs.concurrent.Execution.defaultContext
 

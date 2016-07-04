@@ -14,12 +14,7 @@ class MongoServiceSpec extends Specification with MongoMocks with Mockito with W
   val mockReactiveApi = mock[ReactiveMongoApi]
   val mockCollection = mockedCollection("testcollection")(mockDB)
   mockReactiveApi.db returns mockDB
-
-
-
-  val testMongoService = new MongoService("testcollection") {
-    override lazy val reactiveMongoApi = mockReactiveApi
-  }
+  val testMongoService = new MongoService("testcollection")(mockReactiveApi) {}
 
   "MongoService" should {
 
