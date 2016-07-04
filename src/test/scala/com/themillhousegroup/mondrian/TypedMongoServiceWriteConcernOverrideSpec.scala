@@ -4,9 +4,7 @@ import com.themillhousegroup.mondrian.test.{MockedReactiveApi, ScopedMockedReact
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
-import org.specs2.specification.Scope
 import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoConnectionOptions}
 import reactivemongo.api.commands._
 
 class TypedMongoServiceWriteConcernOverrideSpec extends Specification with MongoMocks with Mockito with Waiting {
@@ -69,7 +67,7 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     }
   }
 
-  "TypedMongoService using an service-level-overridden WriteConcern" should {
+  "TypedMongoService using a service-level-overridden WriteConcern" should {
     "Make insert requests using that level WriteConcern" in new WriteConcernScope(Some(WriteConcern.Journaled)) {
       await(testMongoService.save(unsavedObject))
 

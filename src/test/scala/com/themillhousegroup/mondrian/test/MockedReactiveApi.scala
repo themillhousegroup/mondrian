@@ -1,7 +1,5 @@
 package com.themillhousegroup.mondrian.test
 
-import com.themillhousegroup.reactivemongo.mocks.MongoMocks
-import org.specs2.mock.Mockito
 import org.specs2.mock.mockito.{MockitoStubs, MocksCreation}
 import org.specs2.specification.Scope
 import play.modules.reactivemongo.ReactiveMongoApi
