@@ -4,12 +4,14 @@ import org.specs2.mutable.Specification
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import org.specs2.mock.Mockito
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
-import com.themillhousegroup.mondrian.test.Waiting
-import reactivemongo.api.{DefaultDB, MongoConnectionOptions, MongoConnection}
+import com.themillhousegroup.mondrian.test.{MockedReactiveApi, Waiting}
+import reactivemongo.api.{DefaultDB, MongoConnection, MongoConnectionOptions}
 import reactivemongo.api.commands.WriteConcern
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.specs2.specification.Scope
 
@@ -20,11 +22,11 @@ object TestMongoEntityJson extends MongoJson {
   implicit val converter = Json.format[TestMongoEntity]
 }
 
-class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting {
+class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting with MockedReactiveApi {
 
-  val mockReactiveApi = mock[ReactiveMongoApi]
+
   val mockCollection = mockedCollection("testcollection")(mockDB)
-  mockReactiveApi.db returns mockDB
+
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
 
@@ -56,11 +58,8 @@ class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito w
   }
 }
 
-class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks with Mockito with Waiting {
-  val mockReactiveApi = mock[ReactiveMongoApi]
+class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks with Mockito with Waiting with MockedReactiveApi {
   val mockCollection = mockedCollection("testcollection")(mockDB)
-  mockReactiveApi.db returns mockDB
-
 
   val simpleObject = TestMongoEntity(None, "foo")
 

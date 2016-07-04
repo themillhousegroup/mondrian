@@ -17,15 +17,6 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     val mockDB = mock[DefaultDB]
     val mockReactiveApi = mock[ReactiveMongoApi]
     val mockCollection = mockedCollection("testcollection")(mockDB)
-    mockReactiveApi.db returns mockDB
-
-
-    val mockConnection = mock[MongoConnection]
-    val mockConnectionOptions = mock[MongoConnectionOptions]
-    mockDB.connection returns mockConnection
-    mockConnection.options returns mockConnectionOptions
-
-    mockConnectionOptions.writeConcern returns WriteConcern.Default
 
     val unsavedObject = TestMongoEntity(None, "foo")
     val savedObject = TestMongoEntity(Some(MongoId("123")), "foo")
