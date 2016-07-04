@@ -109,6 +109,9 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
 }
 ```  
 
+Note how the query is built by using the [Play JSON library](https://www.playframework.com/documentation/2.5.x/ScalaJson) to create an object.
+
+
 In the above example, the `listWhere(JsValue)` function from the superclass is being used, but there are many more that you can utilize, for example `findOne(JsValue)`, `cursorWhere(JsValue)` and `enumerateWhere(JsValue)`. See the next section for the details.
 
 #### Inject your new `Service` into your `Controller` classes
@@ -124,7 +127,51 @@ class VehicleController @Inject()(val vehicleService:VehicleService) extends Con
 ```
 
 ## Available Methods
-TBA
+
+#### Public Methods
+As soon as you extend `TypedMongoService[T]`, your `Service` will have the following **public** methods available. All of them return `Future`s of some sort, in keeping with the Reactive philosophy.
+
+##### Creation / Update
+
+Method | Returns | Description
+--- | ---
+`save(obj:T)` | `Future[Boolean]` | Persist `obj`. If its `_id` is `None`, will **insert**. Else will **update**
+`save(objs:Iterable[T])` | `Future[Iterable[Boolean]` | Persist each of the  `objs` as per `save`
+`saveAndPopulate(obj:T)` | `Future[Option[T]]` | Persist `obj` as per `save`, and return it with the `_id` field populated
+`save(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`
+`saveIfNew(obj:T)` | `Future[Option[T]]` | If no similar object found, save `obj` as per `saveAndPopulate`. Otherwise, return the existing object from the collection
+
+##### Retrieval
+
+Method | Returns | Description
+--- | ---
+`countAll` | `Future[Int]` | Count the number of objects in the collection
+`countWhere(jsQuery:JsValue)` | `Future[Int]` | Count the number of matches for `jsQuery`
+`cursorWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Cursor[T]` | Returns a `reactivemongo.api.Cursor` of `jsQuery` matches
+`enumerateWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Enumerator[T]` | Returns a `play.api.libs.iteratee.Enumerator` of `jsQuery` matches
+`findOne(jsQuery:JsValue)` | `Future[Option[T]]` | Attempt to find one object that matches `jsQuery`
+`findOne(example:T)` | `Future[Option[T]]` | Attempt to find one object that matches the `example`
+`findById(id:String)` | `Future[Option[T]]` | Attempt to find the object identified by `id`
+`listAll` | `Future[Seq[T]]` | Returns all in the collection
+`listAll(size: Option[Int] = None, startFrom: Option[Int] = None)` | `Future[Seq[T]]` | Returns all in the collection, paginated
+`listWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Future[Seq[T]]` | Returns `jsQuery` matches with optional pagination & sorting
+
+##### Deletion
+
+Method | Returns | Description
+--- | ---
+`deleteById(id:String)` | `Future[Boolean]` | Delete the object identified by `id`
+`deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery`
+
+
+#### Protected Methods
+Your `Service` that extends `TypedMongoService[T]` also gets access to `protected` methods to make writing additional `T`-specific methods easy:
+##### Retrieval
+
+Method | Returns | Description
+--- | ---
+`findAll` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for all objects in the collection
+`findWhere(jsQuery:JsValue)` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for matching objects in the collection
 
 
 ## Credits

@@ -1,13 +1,19 @@
 package com.themillhousegroup.mondrian
 
 import org.specs2.mutable.Specification
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import org.specs2.mock.Mockito
+
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
-import com.themillhousegroup.mondrian.test.Waiting
+import com.themillhousegroup.mondrian.test.{MockedReactiveApi, Waiting}
+import reactivemongo.api.{DefaultDB, MongoConnection, MongoConnectionOptions}
+import reactivemongo.api.commands.WriteConcern
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import org.specs2.specification.Scope
 
 case class TestMongoEntity(_id: Option[MongoId], name:String) extends MongoEntity
 
@@ -16,13 +22,15 @@ object TestMongoEntityJson extends MongoJson {
   implicit val converter = Json.format[TestMongoEntity]
 }
 
-class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting {
+class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito with Waiting with MockedReactiveApi {
 
-  val mockReactiveApi = mock[ReactiveMongoApi]
+
   val mockCollection = mockedCollection("testcollection")
-  mockReactiveApi.db returns mockDB
+
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
+
+  val simpleObject = TestMongoEntity(None, "foo")
 
   val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection")(TestMongoEntityJson.converter) {
     override lazy val reactiveMongoApi = mockReactiveApi
@@ -34,7 +42,7 @@ class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito w
     }
 
     "return a None from a findOne on an empty collection" in {
-      await(testMongoService.findOne(TestMongoEntity(None, "foo"))) must beNone
+      await(testMongoService.findOne(simpleObject)) must beNone
 
     }
 
@@ -50,11 +58,10 @@ class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito w
   }
 }
 
-class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks with Mockito with Waiting {
-
-  val mockReactiveApi = mock[ReactiveMongoApi]
+class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks with Mockito with Waiting with MockedReactiveApi {
   val mockCollection = mockedCollection("testcollection")
-  mockReactiveApi.db returns mockDB
+
+  val simpleObject = TestMongoEntity(None, "foo")
 
   givenMongoCollectionFindAnyReturns[List](mockCollection, Nil)
 
@@ -71,7 +78,7 @@ class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks 
     }
 
     "return a None from a findOne on an empty collection" in {
-      await(testMongoService.findOne(TestMongoEntity(None, "foo"))) must beNone
+      await(testMongoService.findOne(simpleObject)) must beNone
 
     }
 

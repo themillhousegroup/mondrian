@@ -13,6 +13,13 @@ import play.api.libs.iteratee.Enumerator
 
 abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
+  /** The level of write concern to use for this collection; if not overridden, this will be the
+    * ReactiveMongo connection-wide level as defined in MongoConnectionOptions - which can be globally set
+    * in your application.conf using the key `mongodb.options.writeConcern` with possible values:
+    * unacknowledged / acknowledged / journaled / default
+    */
+  val defaultWriteConcern = reactiveMongoApi.db.connection.options.writeConcern
+
   def cursorWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Cursor[T] = {
     val qo = QueryOpts(skipN = startFrom.getOrElse(0), batchSizeN = size.getOrElse(0))
     sortWith.fold {
@@ -55,15 +62,17 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
    * If the _id is a Some, then an `update` will be performed. The `upsert` flag will be passed
    * to the database, so that if there is no existing object, it will be inserted instead of updated.
    *
-   * @param obj
+   * @param obj the T to be inserted/updated
    * @return a Future containing a Boolean representing the success of the save operation
    */
   def save(obj: T): Future[Boolean] = {
     val json = Json.toJson(obj)(fmt).as[JsObject]
 
-    val op = obj._id.fold(theCollection.insert(json)) { id =>
+    val op = obj._id.fold {
+      theCollection.insert(json, defaultWriteConcern)
+    } { id =>
       val selector = idSelector(id.$oid)
-      theCollection.update(selector, json, reactiveMongoApi.db.connection.options.writeConcern, true)
+      theCollection.update(selector, json, defaultWriteConcern, true)
     }
 
     op.map { err =>
@@ -83,19 +92,25 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
       if (ok) {
         val json = Json.toJson(obj)(fmt)
         //findOne(json)
-		listWhere(json).map { result =>
-			if (result.size < 2) {
-				result.headOption
+		listWhere(json).map { results =>
+			if (results.size < 2) {
+				results.headOption
 			} else {
-				// TODO: There are multiple objects that look like the one 
-				// we have saved and so we need to "try harder" to find the new one...
-				None
+        findMostRecentlyInsertedObject(results)
 			}
 		}
       } else {
         Future.successful(None)
       }
     }
+  }
+
+  // There are multiple objects that look like the one
+  // we have saved and so we need to "try harder" to find the new one..
+  private def findMostRecentlyInsertedObject(candidates:Seq[T]):Option[T] = {
+    candidates.sortBy { candidate =>
+      candidate._id.getOrElse(MongoId.dummyMongoId)
+    }.lastOption
   }
 
   /** Inserts or Updates each 'T' in the provided collection,
@@ -116,5 +131,14 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
         Future.successful(Some(found))
       }
     }
+  }
+
+  /**
+   * Save the object, ensuring that after the save is done, only
+   * the newly-saved object satisfies the given condition - i.e.
+   * other matches of the condition will be deleted
+   */
+  def saveEnsuring(obj:T, condition:JsValue):Future[Boolean] = {
+    Future.failed(new NotImplementedError("This method isn't ready yet"))
   }
 }
