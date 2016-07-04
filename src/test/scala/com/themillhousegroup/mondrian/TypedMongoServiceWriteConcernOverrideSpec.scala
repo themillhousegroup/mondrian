@@ -1,6 +1,6 @@
 package com.themillhousegroup.mondrian
 
-import com.themillhousegroup.mondrian.test.Waiting
+import com.themillhousegroup.mondrian.test.{MockedReactiveApi, ScopedMockedReactiveApi, Waiting}
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
@@ -12,28 +12,25 @@ import reactivemongo.api.commands._
 class TypedMongoServiceWriteConcernOverrideSpec extends Specification with MongoMocks with Mockito with Waiting {
 
   import TestMongoEntityJson._
+  val unsavedObject = TestMongoEntity(None, "foo")
+  val savedObject = TestMongoEntity(Some(MongoId("123")), "foo")
 
-  class WriteConcernScope(maybeOverriddenWriteConcern: Option[WriteConcern]) extends Scope {
-    val mockDB = mock[DefaultDB]
-    val mockReactiveApi = mock[ReactiveMongoApi]
+  class WriteConcernScope(maybeOverriddenWriteConcern: Option[WriteConcern]) extends ScopedMockedReactiveApi {
+    val self = this
     val mockCollection = mockedCollection("testcollection")(mockDB)
-
-    val unsavedObject = TestMongoEntity(None, "foo")
-    val savedObject = TestMongoEntity(Some(MongoId("123")), "foo")
-
 
     givenAnyMongoInsertIsOK(mockCollection, true)
     givenAnyMongoUpdateIsOK(mockCollection, true)
 
     val testMongoService = maybeOverriddenWriteConcern.fold {
       new TypedMongoService[TestMongoEntity]("testcollection") {
-        override lazy val reactiveMongoApi = mockReactiveApi
+        override lazy val reactiveMongoApi:ReactiveMongoApi = self.mockReactiveApi
       }
 
     } { writeConcern =>
 
       new TypedMongoService[TestMongoEntity]("testcollection") {
-        override lazy val reactiveMongoApi = mockReactiveApi
+        override lazy val reactiveMongoApi:ReactiveMongoApi = self.mockReactiveApi
         override val defaultWriteConcern = writeConcern
       }
     }
