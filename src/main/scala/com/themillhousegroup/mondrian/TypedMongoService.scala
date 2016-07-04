@@ -13,6 +13,13 @@ import play.api.libs.iteratee.Enumerator
 
 abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
+  /** The level of write concern to use for this collection; if not overridden, this will be the
+    * ReactiveMongo connection-wide level as defined in MongoConnectionOptions - which can be globally set
+    * in your application.conf using the key `mongodb.options.writeConcern` with possible values:
+    * unacknowledged / acknowledged / journaled / default
+    */
+  val defaultWriteConcern = reactiveMongoApi.db.connection.options.writeConcern
+
   def cursorWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Cursor[T] = {
     val qo = QueryOpts(skipN = startFrom.getOrElse(0), batchSizeN = size.getOrElse(0))
     sortWith.fold {
@@ -55,17 +62,17 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
    * If the _id is a Some, then an `update` will be performed. The `upsert` flag will be passed
    * to the database, so that if there is no existing object, it will be inserted instead of updated.
    *
-   * @param obj
+   * @param obj the T to be inserted/updated
    * @return a Future containing a Boolean representing the success of the save operation
    */
   def save(obj: T): Future[Boolean] = {
     val json = Json.toJson(obj)(fmt).as[JsObject]
 
     val op = obj._id.fold {
-      theCollection.insert(json, reactiveMongoApi.db.connection.options.writeConcern)
+      theCollection.insert(json, defaultWriteConcern)
     } { id =>
       val selector = idSelector(id.$oid)
-      theCollection.update(selector, json, reactiveMongoApi.db.connection.options.writeConcern, true)
+      theCollection.update(selector, json, defaultWriteConcern, true)
     }
 
     op.map { err =>

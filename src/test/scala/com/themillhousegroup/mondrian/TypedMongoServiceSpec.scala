@@ -95,7 +95,7 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
 
   import TestMongoEntityJson._
 
-  class WriteConcernScope(writeConcern:WriteConcern) extends Scope {
+  class WriteConcernScope(maybeOverriddenWriteConcern:Option[WriteConcern]) extends Scope {
     val mockDB = mock[DefaultDB]
     val mockReactiveApi = mock[ReactiveMongoApi]
     val mockCollection = mockedCollection("testcollection")(mockDB)
@@ -107,7 +107,7 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     mockDB.connection returns mockConnection
     mockConnection.options returns mockConnectionOptions
 
-    mockConnectionOptions.writeConcern returns writeConcern
+    mockConnectionOptions.writeConcern returns WriteConcern.Default
 
     val unsavedObject = TestMongoEntity(None, "foo")
     val savedObject = TestMongoEntity(Some(MongoId("123")), "foo")
@@ -116,10 +116,18 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     givenAnyMongoInsertIsOK(mockCollection, true)
     givenAnyMongoUpdateIsOK(mockCollection, true)
 
-    val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection") {
-      override lazy val reactiveMongoApi = mockReactiveApi
-    }
+    val testMongoService = maybeOverriddenWriteConcern.fold {
+      new TypedMongoService[TestMongoEntity]("testcollection") {
+        override lazy val reactiveMongoApi = mockReactiveApi
+      }
 
+    } { writeConcern =>
+
+      new TypedMongoService[TestMongoEntity]("testcollection") {
+        override lazy val reactiveMongoApi = mockReactiveApi
+        override val defaultWriteConcern = writeConcern
+      }
+    }
   }
 
 
@@ -132,7 +140,7 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
 
   "TypedMongoService using the default WriteConcern" should {
 
-    "Make insert requests using WriteConcern.Default" in new WriteConcernScope(WriteConcern.Default){
+    "Make insert requests using WriteConcern.Default" in new WriteConcernScope(None){
       await(testMongoService.save(unsavedObject))
 
 
@@ -143,7 +151,7 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
       writeConcernCaptor.value must beEqualTo(WriteConcern.Default)
     }
 
-    "Make update requests using WriteConcern.Default" in new WriteConcernScope(WriteConcern.Default){
+    "Make update requests using WriteConcern.Default" in new WriteConcernScope(None){
       await(testMongoService.save(savedObject))
 
 
@@ -155,8 +163,8 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     }
   }
 
-  "TypedMongoService using an overridden WriteConcern" should {
-    "Make insert requests using that level WriteConcern" in new WriteConcernScope(WriteConcern.Journaled) {
+  "TypedMongoService using an service-level-overridden WriteConcern" should {
+    "Make insert requests using that level WriteConcern" in new WriteConcernScope(Some(WriteConcern.Journaled)) {
       await(testMongoService.save(unsavedObject))
 
       val writeConcernCaptor = capture[WriteConcern]
@@ -166,7 +174,7 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
       writeConcernCaptor.value must beEqualTo(WriteConcern.Journaled)
     }
 
-    "Make update requests using that level WriteConcern" in new WriteConcernScope(WriteConcern.Journaled){
+    "Make update requests using that level WriteConcern" in new WriteConcernScope(Some(WriteConcern.Journaled)){
       await(testMongoService.save(savedObject))
 
 
