@@ -173,6 +173,25 @@ Method | Returns | Description
 `findAll` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for all objects in the collection
 `findWhere(jsQuery:JsValue)` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for matching objects in the collection
 
+## A note about Write Concerns
+By default, Mondrian uses the same [MongoDB Write Concern](https://docs.mongodb.com/manual/reference/write-concern/) as Play-ReactiveMongo - which is ([currently](https://github.com/ReactiveMongo/ReactiveMongo/blob/master/driver/src/main/scala/api/commands/rwcommands.scala#L44)) `Acknowledged`. 
+
+Should you wish to specify a different level of Write Concern, override the `defaultWriteConcern` in your `Service`, like this:
+
+```
+import com.themillhousegroup.mondrian._
+import models.VehicleJson 
+import reactivemongo.api.commands.WriteConcern
+ 
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) 
+
+  // Writes will be written to the journal and we'll wait until
+  // one Mongo instance has acknowledged this write.
+  override val defaultWriteConcern = WriteConcern.Journaled 
+  
+  ...
+}
+```
 
 ## Credits
 
