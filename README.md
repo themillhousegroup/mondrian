@@ -9,28 +9,20 @@ An extra layer supplying the classic CRUD operations for Play-ReactiveMongo obje
 Bring in the library by adding the following to your Play project's ```build.sbt```. 
 The release repository: 
 
-```
-   resolvers ++= Seq(
-     "Millhouse Bintray"  at "http://dl.bintray.com/themillhousegroup/maven"
-   )
+```scala
+resolvers += "Millhouse Bintray" at "http://dl.bintray.com/themillhousegroup/maven"
 ```
 And the dependency itself: 
 
 ##### For Play 2.4.x:
 
-```
-   libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "mondrian" % "0.2.21"
-   )
-
+```scala
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.2.21"
 ```
 ##### For Play 2.5.x:
 
-```
-   libraryDependencies ++= Seq(
-     "com.themillhousegroup" %% "mondrian" % "0.3.30"
-   )
-
+```scala
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.3.30"
 ```
 
 ## Usage
@@ -39,7 +31,7 @@ Once you have __mondrian__ added to your Play project, you can start using it li
 
 #### Enable the **ReactiveMongoModule** in your `application.conf`
 You may already have this if you've been using the vanilla Reactive Mongo Module:
-```
+```scala
 play.modules.enabled += "play.modules.reactivemongo.ReactiveMongoModule" 
 ```
 
@@ -55,21 +47,21 @@ mongodb.uri="mongodb://user:password@ds12345.mongolab.com:12345/mydb"
 
 A `MongoEntity` simply includes an `_id: Option[MongoId]` field like this:
 
-```
-  import com.themillhousegroup.mondrian.{MongoEntity, MongoId}
-  
-  case class Vehicle(
-  	val _id: Option[MongoId],
-  	val name: String,
-  	val manufacturer:Manufacturer,
-  	val yearFirstOffered:Int,
-  	val yearLastOffered:Option[Int]) extends MongoEntity
+```scala
+import com.themillhousegroup.mondrian.{MongoEntity, MongoId}
+
+case class Vehicle(
+  val _id: Option[MongoId],
+  val name: String,
+  val manufacturer:Manufacturer,
+  val yearFirstOffered:Int,
+  val yearLastOffered:Option[Int]) extends MongoEntity
 ```
 
 #### Define an `implicit` Play-JSON `Format` for your new object 
 You can extend `MongoJson` to get the implicit conversion for the `MongoId`; perhaps something like this:
 
-```
+```scala
 import play.api.libs.json.Json
 
 object VehicleJson extends MongoJson {
@@ -83,31 +75,31 @@ object VehicleJson extends MongoJson {
 
 This `Service` joins together your domain object, the name of the MongoDB collection that will hold it, and the `Format` to read/write it.
 
-If you just want basic CRUD operations defined for your model object, you just need ONE line of code (plus the appropriate imports):  
+If you just want basic CRUD operations defined for your model object, you just need ONE line of code (plus the appropriate imports):
 
-```
+```scala
 import com.themillhousegroup.mondrian._
 import models.VehicleJson._ 
  
 class VehicleService extends TypedMongoService[Vehicle]("vehicles")
-```  
+```
 
 Because of the `VehicleJson._` import, the compiler is able to find the implicit JSON `Format` it needs. You
 can supply it explicitly if you prefer, as shown next.
 Of course you can add extra methods that are useful; for example:
 
 
-```
+```scala
 import com.themillhousegroup.mondrian._
 import models.VehicleJson 
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) 
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) {
   
   def findVehiclesFirstSoldIn(year:Int):Future[List[Vehicle]] = {
     listWhere(Json.obj("yearFirstOffered" -> year))
   }
 }
-```  
+```
 
 Note how the query is built by using the [Play JSON library](https://www.playframework.com/documentation/2.5.x/ScalaJson) to create an object.
 
@@ -118,10 +110,9 @@ In the above example, the `listWhere(JsValue)` function from the superclass is b
 
 For example:
 
-```
+```scala
 class VehicleController @Inject()(val vehicleService:VehicleService) extends Controller {
-
-  ...
+  // ...
 }
 
 ```
@@ -133,63 +124,63 @@ As soon as you extend `TypedMongoService[T]`, your `Service` will have the follo
 
 ##### Creation / Update
 
-Method | Returns | Description
---- | ---
-`save(obj:T)` | `Future[Boolean]` | Persist `obj`. If its `_id` is `None`, will **insert**. Else will **update**
-`save(objs:Iterable[T])` | `Future[Iterable[Boolean]` | Persist each of the  `objs` as per `save`
-`saveAndPopulate(obj:T)` | `Future[Option[T]]` | Persist `obj` as per `save`, and return it with the `_id` field populated
-`save(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`
-`saveIfNew(obj:T)` | `Future[Option[T]]` | If no similar object found, save `obj` as per `saveAndPopulate`. Otherwise, return the existing object from the collection
+|       Method            |          Returns              |                                                        Description                                                         |
+|-------------------------|-------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+|`save(obj:T)`            | `Future[Boolean]`             | Persist `obj`. If its `_id` is `None`, will **insert**. Else will **update**                                               |
+|`save(objs:Iterable[T])` | `Future[Iterable[Boolean]]`   | Persist each of the  `objs` as per `save`                                                                                  |
+|`saveAndPopulate(obj:T)` | `Future[Option[T]]`           | Persist `obj` as per `save`, and return it with the `_id` field populated                                                  |
+|`save(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`                                                                       |
+|`saveIfNew(obj:T)`       | `Future[Option[T]]`           | If no similar object found, save `obj` as per `saveAndPopulate`. Otherwise, return the existing object from the collection |
 
 ##### Retrieval
 
-Method | Returns | Description
---- | ---
-`countAll` | `Future[Int]` | Count the number of objects in the collection
-`countWhere(jsQuery:JsValue)` | `Future[Int]` | Count the number of matches for `jsQuery`
-`cursorWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Cursor[T]` | Returns a `reactivemongo.api.Cursor` of `jsQuery` matches
-`enumerateWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Enumerator[T]` | Returns a `play.api.libs.iteratee.Enumerator` of `jsQuery` matches
-`findOne(jsQuery:JsValue)` | `Future[Option[T]]` | Attempt to find one object that matches `jsQuery`
-`findOne(example:T)` | `Future[Option[T]]` | Attempt to find one object that matches the `example`
-`findById(id:String)` | `Future[Option[T]]` | Attempt to find the object identified by `id`
-`listAll` | `Future[Seq[T]]` | Returns all in the collection
-`listAll(size: Option[Int] = None, startFrom: Option[Int] = None)` | `Future[Seq[T]]` | Returns all in the collection, paginated
-`listWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Future[Seq[T]]` | Returns `jsQuery` matches with optional pagination & sorting
+|                                                   Method                                                                     |       Returns       |                            Description                             |
+|------------------------------------------------------------------------------------------------------------------------------|---------------------|--------------------------------------------------------------------|
+|`countAll`                                                                                                                    | `Future[Int]`       | Count the number of objects in the collection                      |
+|`countWhere(jsQuery:JsValue)`                                                                                                 | `Future[Int]`       | Count the number of matches for `jsQuery`                          |
+|`cursorWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)`    | `Cursor[T]`         | Returns a `reactivemongo.api.Cursor` of `jsQuery` matches          |
+|`enumerateWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Enumerator[T]`     | Returns a `play.api.libs.iteratee.Enumerator` of `jsQuery` matches |
+|`findOne(jsQuery:JsValue)`                                                                                                    | `Future[Option[T]]` | Attempt to find one object that matches `jsQuery`                  |
+|`findOne(example:T)`                                                                                                          | `Future[Option[T]]` | Attempt to find one object that matches the `example`              |
+|`findById(id:String)`                                                                                                         | `Future[Option[T]]` | Attempt to find the object identified by `id`                      |
+|`listAll`                                                                                                                     | `Future[Seq[T]]`    | Returns all in the collection                                      |
+|`listAll(size: Option[Int] = None, startFrom: Option[Int] = None)`                                                            | `Future[Seq[T]]`    | Returns all in the collection, paginated                           |
+|`listWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)`      | `Future[Seq[T]]`    | Returns `jsQuery` matches with optional pagination & sorting       |
 
 ##### Deletion
 
-Method | Returns | Description
---- | ---
-`deleteById(id:String)` | `Future[Boolean]` | Delete the object identified by `id`
-`deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery`
+|            Method             |      Returns      |            Description                |
+|-------------------------------|-------------------|---------------------------------------|
+|`deleteById(id:String)`        | `Future[Boolean]` | Delete the object identified by `id`  |
+|`deleteWhere(jsQuery:JsValue)` | `Future[Boolean]` | Delete all objects matching `jsQuery` |
 
 
 #### Protected Methods
 Your `Service` that extends `TypedMongoService[T]` also gets access to `protected` methods to make writing additional `T`-specific methods easy:
 ##### Retrieval
 
-Method | Returns | Description
---- | ---
-`findAll` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for all objects in the collection
-`findWhere(jsQuery:JsValue)` | `reactivemongo.api.collections. GenericQueryBuilder` | Get a GQB for matching objects in the collection
+|         Method              |                       Returns                        |                   Description                    |
+|-----------------------------|------------------------------------------------------|--------------------------------------------------|
+|`findAll`                    | `reactivemongo.api.collections.GenericQueryBuilder`  | Get a GQB for all objects in the collection      |
+|`findWhere(jsQuery:JsValue)` | `reactivemongo.api.collections.GenericQueryBuilder`  | Get a GQB for matching objects in the collection |
 
 ## A note about Write Concerns
 By default, Mondrian uses the same [MongoDB Write Concern](https://docs.mongodb.com/manual/reference/write-concern/) as Play-ReactiveMongo - which is ([currently](https://github.com/ReactiveMongo/ReactiveMongo/blob/master/driver/src/main/scala/api/commands/rwcommands.scala#L44)) `Acknowledged`. 
 
 Should you wish to specify a different level of Write Concern, override the `defaultWriteConcern` in your `Service`, like this:
 
-```
+```scala
 import com.themillhousegroup.mondrian._
 import models.VehicleJson 
 import reactivemongo.api.commands.WriteConcern
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) 
+class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) {
 
   // Writes will be written to the journal and we'll wait until
   // one Mongo instance has acknowledged this write.
   override val defaultWriteConcern = WriteConcern.Journaled 
   
-  ...
+  // ...
 }
 ```
 
