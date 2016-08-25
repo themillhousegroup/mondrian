@@ -1,6 +1,6 @@
 package com.themillhousegroup.mondrian
 
-import com.themillhousegroup.mondrian.test.{MockedReactiveApi, ScopedMockedReactiveApi, Waiting}
+import com.themillhousegroup.mondrian.test.{MockedConnection, MockedReactiveApi, ScopedMockedReactiveApi, Waiting}
 import com.themillhousegroup.reactivemongo.mocks.MongoMocks
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
@@ -20,12 +20,16 @@ class TypedMongoServiceWriteConcernOverrideSpec extends Specification with Mongo
     givenAnyMongoInsertIsOK(mockCollection, true)
     givenAnyMongoUpdateIsOK(mockCollection, true)
 
-    val testMongoService = maybeOverriddenWriteConcern.fold {
-      new TypedMongoService[TestMongoEntity]("testcollection")(self.mockReactiveApi){}
-    } { writeConcern =>
 
-      new TypedMongoService[TestMongoEntity]("testcollection")(self.mockReactiveApi) {
-        override val defaultWriteConcern = writeConcern
+
+    val testMongoService = maybeOverriddenWriteConcern.fold {
+      new TypedMongoService[TestMongoEntity]("testcollection"){
+        val reactiveMongoApi = self.mockReactiveApi
+      }
+    } { writeConcern =>
+      new TypedMongoService[TestMongoEntity]("testcollection") {
+        val reactiveMongoApi = self.mockReactiveApi
+        override lazy val defaultWriteConcern = writeConcern
       }
     }
   }

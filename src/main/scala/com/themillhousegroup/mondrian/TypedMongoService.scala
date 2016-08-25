@@ -4,21 +4,25 @@ import reactivemongo.api._
 import play.modules.reactivemongo.json.collection._
 import play.modules.reactivemongo._
 import play.modules.reactivemongo.json._
-import play.api.Play.current
 import scala.concurrent.Future
 import play.api.libs.json.{ JsValue, JsObject, Json, Format }
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.language.existentials
 import play.api.libs.iteratee.Enumerator
 
-abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(override val reactiveMongoApi:ReactiveMongoApi)(implicit val fmt:Format[T]) extends MongoService(collectionName)(reactiveMongoApi) {
+abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
+
+  /**
+    * `@Inject()` this into your instance in the normal Play DI way
+    */
+  val reactiveMongoApi:ReactiveMongoApi
 
   /** The level of write concern to use for this collection; if not overridden, this will be the
     * ReactiveMongo connection-wide level as defined in MongoConnectionOptions - which can be globally set
     * in your application.conf using the key `mongodb.options.writeConcern` with possible values:
     * unacknowledged / acknowledged / journaled / default
     */
-  val defaultWriteConcern = reactiveMongoApi.db.connection.options.writeConcern
+  lazy val defaultWriteConcern = reactiveMongoApi.db.connection.options.writeConcern
 
   def cursorWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Cursor[T] = {
     val qo = QueryOpts(skipN = startFrom.getOrElse(0), batchSizeN = size.getOrElse(0))

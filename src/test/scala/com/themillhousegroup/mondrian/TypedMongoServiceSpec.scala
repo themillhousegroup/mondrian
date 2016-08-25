@@ -32,7 +32,9 @@ class TypedMongoServiceSpec extends Specification with MongoMocks with Mockito w
 
   val simpleObject = TestMongoEntity(None, "foo")
 
-  val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection")(mockReactiveApi)(TestMongoEntityJson.converter) {}
+  val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection")(TestMongoEntityJson.converter) {
+    val reactiveMongoApi = mockReactiveApi
+  }
 
   "TypedMongoService" should {
     "use an implicit Format to do internal JSON conversion" in {
@@ -65,8 +67,9 @@ class TypedMongoServiceImplicitFormatSpec extends Specification with MongoMocks 
 
   import TestMongoEntityJson._
 
-  val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection")(mockReactiveApi)(TestMongoEntityJson.converter) {}
-
+  val testMongoService = new TypedMongoService[TestMongoEntity]("testcollection")(TestMongoEntityJson.converter) {
+    val reactiveMongoApi = mockReactiveApi
+  }
 
   "TypedMongoService using an implicit Format" should {
     "use an implicit Format to do internal JSON conversion" in {

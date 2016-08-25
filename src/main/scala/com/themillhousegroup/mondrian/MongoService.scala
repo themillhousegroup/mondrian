@@ -9,7 +9,9 @@ import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
 import play.modules.reactivemongo.ReactiveMongoApi
 
-abstract class MongoService(collectionName: String)(val reactiveMongoApi:ReactiveMongoApi) {
+abstract class MongoService(collectionName: String) {
+
+  val reactiveMongoApi:ReactiveMongoApi
 
   implicit val defaultContext = play.api.libs.concurrent.Execution.defaultContext
 
