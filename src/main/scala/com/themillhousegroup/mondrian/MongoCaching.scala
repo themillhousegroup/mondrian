@@ -29,6 +29,15 @@ trait MongoCaching[ME <: MongoEntity] {
     withOneToOneCache[R, String](entity => entity.id, idCacheName)(f)
   }
 
+  /** Clears all the entries in the id -> entity Map */
+  def clearIdCache():Unit = clearCache(idCacheName)
+
+  /** Clears all the entries in the given cache */
+  def clearCache[K, V](cacheName:String):Unit = {
+    val emptyMap = Map[K, V]()
+    cache.set(cacheName, emptyMap, cacheExpirationTime)
+  }
+
   /**
     * If each ME object can be *uniquely* identified by a key of type K, store a Map
     * of (K -> ME) and use that for lookups.
@@ -73,4 +82,6 @@ trait MongoCaching[ME <: MongoEntity] {
       Future.successful(f(theMap))
     }
   }
+
+
 }
