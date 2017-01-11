@@ -35,5 +35,19 @@ abstract class MongoService(collectionName: String) {
     theCollection.remove(jsQuery.as[JsObject]).map(_.ok)
   }
 
-  def deleteById(id: String): Future[Boolean] = deleteWhere(idSelector(id))
+  /**
+    * @param jsQuery the query that selects the objects to be deleted
+    * @return the overall success of the command, and the number that were actually deleted
+    */
+  def deleteWhereAndCount(jsQuery: JsValue): Future[(Boolean, Int)] = {
+    theCollection.remove(jsQuery.as[JsObject]).map(wr => wr.ok -> wr.n)
+  }
+
+  /**
+    * @param id the identifier (in simple String form) of the object to be deleted
+    * @return true iff the operation succeeded AND exactly one object was deleted
+    */
+  def deleteById(id: String): Future[Boolean] = deleteWhereAndCount(idSelector(id)).map { case (ok, n) =>
+    ok && n == 1
+  }
 }
