@@ -56,8 +56,6 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     findOne(idSelector(id))
   }
 
-  private def idSelector(id: String): JsObject = Json.obj("_id" -> Json.obj("$oid" -> id))
-
   /**
    * Attempt to persist the given object.
    * If the _id field is None, an `insert` operation will be used, and the database will generate the ID.
