@@ -29,7 +29,8 @@ abstract class MongoService(collectionName: String) {
 
   def countAll:Future[Int] = theCollection.count(None)
 
-  protected def idSelector(id: String): JsObject = Json.obj("_id" -> Json.obj("$oid" -> id))
+  protected def idOf(id:String):JsValue = Json.obj("$oid" -> id)
+  protected def idSelector(id: String): JsObject = Json.obj("_id" -> idOf(id))
 
   def deleteWhere(jsQuery: JsValue): Future[Boolean] = {
     theCollection.remove(jsQuery.as[JsObject]).map(_.ok)

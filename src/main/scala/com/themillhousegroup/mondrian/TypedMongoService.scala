@@ -4,15 +4,18 @@ import reactivemongo.api._
 import play.modules.reactivemongo.json.collection._
 import play.modules.reactivemongo._
 import play.modules.reactivemongo.json._
+
 import scala.concurrent.Future
-import play.api.libs.json.{ JsValue, JsObject, Json, Format }
+import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
+
 import scala.language.existentials
 import play.api.libs.iteratee.Enumerator
 
 abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
   /**
+    *
     * `@Inject()` this into your instance in the normal Play DI way
     */
   val reactiveMongoApi:ReactiveMongoApi
@@ -54,6 +57,45 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
 
   def findById(id: String): Future[Option[T]] = {
     findOne(idSelector(id))
+  }
+
+  protected def inIdsSelector(ids:Iterable[String]):JsValue = {
+    import play.api.libs.json.Json._
+    Json.obj(
+      "_id" ->
+        Json.obj(
+          "$in" ->
+            JsArray(ids.toSeq.map(idOf))
+        )
+    )
+  }
+
+  /**
+    * Attempt to find as many matches as possible for the supplied IDs.
+    * The length of the resultant Iterable may be shorter than the supplied
+    * Iterable if we fail to find some objects. Also, the order of the
+    * returned Iterable is not guaranteed to match the IDs supplied.
+    * If you need a more strictly-correct finder (at the expense of speed)
+    * try findByIdInOrder(ids)
+    */
+  def findById(ids:Iterable[String]):Future[Iterable[T]] = {
+    listWhere(inIdsSelector(ids))
+  }
+
+  /**
+    * Attempt to find each object denoted by its ID.
+    * The positions of objects in the returned Iterable will *exactly
+    * match* the positions of IDs in the incoming Iterable,
+    * being a None if no object was found.
+    */
+  def findByIdInOrder(ids:Iterable[String]):Future[Iterable[Option[T]]] = {
+    findById(ids).map { results =>
+      val resultsIdMap = results.map(r => r.id -> r).toMap
+
+      ids.map { id =>
+        resultsIdMap.get(id)
+      }
+    }
   }
 
   /**
