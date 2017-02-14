@@ -129,7 +129,7 @@ As soon as you extend `TypedMongoService[T]`, your `Service` will have the follo
 |`save(obj:T)`            | `Future[Boolean]`             | Persist `obj`. If its `_id` is `None`, will **insert**. Else will **update**                                               |
 |`save(objs:Iterable[T])` | `Future[Iterable[Boolean]]`   | Persist each of the  `objs` as per `save`                                                                                  |
 |`saveAndPopulate(obj:T)` | `Future[Option[T]]`           | Persist `obj` as per `save`, and return it with the `_id` field populated                                                  |
-|`save(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`                                                                       |
+|`saveAndPopulate(objs:Iterable[T])` | `Future[Iterable[Option[T]]]` | Persist each of the  `objs` as per `saveAndPopulate`                                                                       |
 |`saveIfNew(obj:T)`       | `Future[Option[T]]`           | If no similar object found, save `obj` as per `saveAndPopulate`. Otherwise, return the existing object from the collection |
 
 ##### Retrieval
