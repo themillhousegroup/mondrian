@@ -22,7 +22,7 @@ libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.2.21"
 ##### For Play 2.5.x:
 
 ```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.3.30"
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.4.61"
 ```
 
 ## Usage
@@ -45,7 +45,7 @@ mongodb.uri="mongodb://user:password@ds12345.mongolab.com:12345/mydb"
 
 #### Define a model object that extends the `MongoEntity` trait
 
-A `MongoEntity` simply includes an `_id: Option[MongoId]` field like this:
+You may already have models defined. A `MongoEntity` simply includes an additional `_id: Option[MongoId]` field like this:
 
 ```scala
 import com.themillhousegroup.mondrian.{MongoEntity, MongoId}
@@ -59,6 +59,7 @@ case class Vehicle(
 ```
 
 #### Define an `implicit` Play-JSON `Format` for your new object 
+Again, you may have already written a `Format` if you've been sending/receiving JSON over HTTP. 
 You can extend `MongoJson` to get the implicit conversion for the `MongoId`; perhaps something like this:
 
 ```scala
@@ -77,11 +78,23 @@ This `Service` joins together your domain object, the name of the MongoDB collec
 
 If you just want basic CRUD operations defined for your model object, you just need ONE line of code (plus the appropriate imports):
 
+##### For Play 2.4.x:
+
 ```scala
 import com.themillhousegroup.mondrian._
 import models.VehicleJson._ 
  
 class VehicleService extends TypedMongoService[Vehicle]("vehicles")
+```
+
+##### For Play 2.5.x (dependency injection is _required_):
+
+```scala
+import javax.inject.Inject
+import com.themillhousegroup.mondrian._
+import models.VehicleJson._ 
+ 
+class VehicleService @Inject() (val reactiveMongoApi:ReactiveMongoApi) extends TypedMongoService[Vehicle]("vehicles")
 ```
 
 Because of the `VehicleJson._` import, the compiler is able to find the implicit JSON `Format` it needs. You
@@ -90,10 +103,11 @@ Of course you can add extra methods that are useful; for example:
 
 
 ```scala
+import javax.inject.Inject
 import com.themillhousegroup.mondrian._
 import models.VehicleJson 
  
-class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) {
+class VehicleService @Inject() (val reactiveMongoApi:ReactiveMongoApi) extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.vehicleFormat) {
   
   def findVehiclesFirstSoldIn(year:Int):Future[List[Vehicle]] = {
     listWhere(Json.obj("yearFirstOffered" -> year))
