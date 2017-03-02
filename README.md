@@ -29,7 +29,7 @@ libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.3.30"
 
 Once you have __mondrian__ added to your Play project, you can start using it like this:
 
-#### Enable the **ReactiveMongoModule** in your `application.conf`
+#### (For Play < 2.5) Enable the **ReactiveMongoModule** in your `application.conf`
 You may already have this if you've been using the vanilla Reactive Mongo Module:
 ```scala
 play.modules.enabled += "play.modules.reactivemongo.ReactiveMongoModule" 
