@@ -19,17 +19,23 @@ And the dependency itself:
 ```scala
 libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.2.21"
 ```
-##### For Play 2.5.x:
+##### For Play 2.5.x (and Reactive Mongo 0.11.x):
 
 ```scala
 libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.4.61"
+```
+
+##### For Play 2.5.x (and Reactive Mongo 0.12.5):
+
+```scala
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.5.66"
 ```
 
 ## Usage
 
 Once you have __mondrian__ added to your Play project, you can start using it like this:
 
-#### (For Play < 2.5) Enable the **ReactiveMongoModule** in your `application.conf`
+#### Enable the **ReactiveMongoModule** in your `application.conf`
 You may already have this if you've been using the vanilla Reactive Mongo Module:
 ```scala
 play.modules.enabled += "play.modules.reactivemongo.ReactiveMongoModule" 
@@ -45,7 +51,7 @@ mongodb.uri="mongodb://user:password@ds12345.mongolab.com:12345/mydb"
 
 #### Define a model object that extends the `MongoEntity` trait
 
-You may already have models defined. A `MongoEntity` simply includes an additional `_id: Option[MongoId]` field like this:
+You may already have models defined. A `MongoEntity` simply includes an `_id: Option[MongoId]` field like this:
 
 ```scala
 import com.themillhousegroup.mondrian.{MongoEntity, MongoId}
