@@ -17,7 +17,6 @@ libraryDependencies ++= Seq(
     "org.reactivemongo"       %%    "play2-reactivemongo"       % targetPlayReactiveMongoVersion,
     "com.typesafe.play"       %%    "play"                      % targetPlayVersion                             % "provided",
     "com.typesafe.play"       %%    "play-cache"                % targetPlayVersion                             % "provided",
-    //"io.netty"              %     "netty"                     % "3.10.4.Final"                                % "provided",
     "org.mockito"             %     "mockito-all"               % "1.10.19"                                     % "test",
     "org.specs2"              %%    "specs2"                    % minimumSpecs2Version                          % "test"
 )
@@ -28,10 +27,6 @@ resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/reposit
                     "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/")
 
 jacoco.settings
-
-publishArtifact in (Compile, packageDoc) := false
-
-seq(bintraySettings:_*)
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
