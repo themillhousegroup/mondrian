@@ -28,6 +28,8 @@ resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/reposit
 
 jacoco.settings
 
+seq(bintraySettings:_*)
+
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
