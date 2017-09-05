@@ -27,7 +27,11 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     */
   lazy val defaultWriteConcern = reactiveMongoApi.db.connection.options.writeConcern
 
-  def cursorWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Cursor[T] = {
+  def cursorWhere(jsQuery: JsValue,
+                  size: Option[Int] = None,
+                  startFrom: Option[Int] = None,
+                  sortWith: Option[JsObject] = None,
+                  jsProjection: Option[JsValue] = None): Cursor[T] = {
     val qo = QueryOpts(skipN = startFrom.getOrElse(0), batchSizeN = size.getOrElse(0))
     sortWith.fold {
       findWhere(jsQuery).options(qo).cursor[T](readPreference) // (fmt, defaultContext, CursorProducer.defaultCursorProducer[T])
@@ -36,15 +40,26 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     }
   }
 
-  def listWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Future[Seq[T]] = {
-    cursorWhere(jsQuery, size, startFrom, sortWith).collect[Seq]()
+  def listWhere(jsQuery: JsValue,
+                size: Option[Int] = None,
+                startFrom: Option[Int] = None,
+                sortWith: Option[JsObject] = None,
+                jsProjection: Option[JsValue] = None): Future[Seq[T]] = {
+    cursorWhere(jsQuery, size, startFrom, sortWith, jsProjection).collect[Seq]()
   }
 
-  def listAll: Future[Seq[T]] = listAll(None, None)
-  def listAll(size: Option[Int] = None, startFrom: Option[Int] = None): Future[Seq[T]] = listWhere(all, size, startFrom)
+  def listAll: Future[Seq[T]] = listAll(None, None, None)
 
-  def enumerateWhere(jsQuery: JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None): Enumerator[T] = {
-    cursorWhere(jsQuery, size, startFrom, sortWith).enumerate()
+  def listAll(size: Option[Int] = None,
+              startFrom: Option[Int] = None,
+              jsProjection: Option[JsValue] = None): Future[Seq[T]] = listWhere(all, size, startFrom, None, jsProjection)
+
+  def enumerateWhere(jsQuery: JsValue,
+                     size: Option[Int] = None,
+                     startFrom: Option[Int] = None,
+                     sortWith: Option[JsObject] = None,
+                     jsProjection: Option[JsValue] = None): Enumerator[T] = {
+    cursorWhere(jsQuery, size, startFrom, sortWith, jsProjection).enumerate()
   }
 
   def findOne(jsQuery: JsValue): Future[Option[T]] = {

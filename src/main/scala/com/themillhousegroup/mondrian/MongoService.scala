@@ -21,9 +21,17 @@ abstract class MongoService(collectionName: String) {
 
   protected val all = Json.obj()
 
-  protected def findWhere(jsQuery: JsValue) = theCollection.find(jsQuery.as[JsObject])
+  protected def findWhere(jsQuery: JsValue, jsProjection:Option[JsValue] = None) = {
+    jsProjection.fold {
+      theCollection.find(jsQuery.as[JsObject])
+    } { jsProj =>
+      theCollection.find(jsQuery.as[JsObject], jsProj.as[JsObject])
+    }
+  }
 
   protected def findAll = findWhere(all)
+
+  protected def findAllWithProjection(jsProjection:JsValue) = findWhere(all, Some(jsProjection))
 
   def countWhere(jsQuery: JsValue):Future[Int] = theCollection.count(Some(jsQuery.as[JsObject]))
 
