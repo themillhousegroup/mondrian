@@ -9,12 +9,15 @@
 
 // addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
 
-resolvers += Resolver.url(
-  "bintray-sbt-plugin-releases",
-    url("http://dl.bintray.com/content/sbt/sbt-plugin-releases"))(
-        Resolver.ivyStylePatterns)
+//resolvers += Resolver.url(
+//  "bintray-sbt-plugin-releases",
+//    url("http://dl.bintray.com/content/sbt/sbt-plugin-releases"))(
+//        Resolver.ivyStylePatterns)
+//
+//addSbtPlugin("me.lessis" % "bintray-sbt" % "0.1.2")
+//
 
-addSbtPlugin("me.lessis" % "bintray-sbt" % "0.1.2")
+addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.1")
 
 
 // Uncomment if this is a Scala 2.11(+) project to get scapegoat linting:
