@@ -1,10 +1,10 @@
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
+// addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
 
-addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.1.6")
+addSbtPlugin("de.johoop" % "jacoco4sbt" % "2.3.0")
 
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.6")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.1")
 
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
 
 resolvers += Resolver.url(
   "bintray-sbt-plugin-releases",
