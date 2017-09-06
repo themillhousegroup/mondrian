@@ -28,7 +28,7 @@ libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.4.61"
 ##### For Play 2.5.x (and Reactive Mongo 0.12.5):
 
 ```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.5.66"
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.6.76"
 ```
 
 ## Usage
@@ -158,7 +158,7 @@ As soon as you extend `TypedMongoService[T]`, your `Service` will have the follo
 |------------------------------------------------------------------------------------------------------------------------------|---------------------|--------------------------------------------------------------------|
 |`countAll`                                                                                                                    | `Future[Int]`       | Count the number of objects in the collection                      |
 |`countWhere(jsQuery:JsValue)`                                                                                                 | `Future[Int]`       | Count the number of matches for `jsQuery`                          |
-|`cursorWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)`    | `Cursor[T]`         | Returns a `reactivemongo.api.Cursor` of `jsQuery` matches          |
+|`cursorWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None, jsProjection: Option[JsValue] = None)`    | `Cursor[T]`         | Returns a `reactivemongo.api.Cursor` of `jsQuery` matches          |
 |`enumerateWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)` | `Enumerator[T]`     | Returns a `play.api.libs.iteratee.Enumerator` of `jsQuery` matches |
 |`findOne(jsQuery:JsValue)`                                                                                                    | `Future[Option[T]]` | Attempt to find one object that matches `jsQuery`                  |
 |`findOne(example:T)`                                                                                                          | `Future[Option[T]]` | Attempt to find one object that matches the `example`              |
@@ -167,7 +167,7 @@ As soon as you extend `TypedMongoService[T]`, your `Service` will have the follo
 |`findByIdInOrder(ids:Iterable[String])`                                                                                                         | `Future[Iterable[Option[T]]]` | Attempt to find each object denoted by its ID - a `None` in any position means no object was found for the corresponding ID  |
 |`listAll`                                                                                                                     | `Future[Seq[T]]`    | Returns all in the collection                                      |
 |`listAll(size: Option[Int] = None, startFrom: Option[Int] = None)`                                                            | `Future[Seq[T]]`    | Returns all in the collection, paginated                           |
-|`listWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = None)`      | `Future[Seq[T]]`    | Returns `jsQuery` matches with optional pagination & sorting       |
+|`listWhere(jsQuery:JsValue, size: Option[Int] = None, startFrom: Option[Int] = None, sortWith: Option[JsObject] = NonejsProjection: Option[JsValue] = None)`      | `Future[Seq[T]]`    | Returns `jsQuery` matches with optional pagination & sorting       |
 
 ##### Deletion
 
@@ -204,6 +204,53 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
   
   // ...
 }
+```
+
+## Examples
+For an entity defined as:
+
+```
+case class ExampleEntity (
+  _id: Option[MongoId],
+  createdAt: DateTime,
+  foo: Long,
+  bar: String,
+  bazzes: Seq[HeavyweightBaz]
+) extends MongoEntity
+
+```
+Here's how some common service operations might look:
+
+```
+class ExampleEntityService @Inject() (val reactiveMongoApi:ReactiveMongoApi)
+  extends TypedMongoService[ExampleEntity]("exampleEntities") {
+
+  // Return the 'n' most recently-created documents:
+  def listMostRecent(howMany:Option[Int]): Future[Seq[ExampleEntity]] = {
+    listWhere(
+      Json.obj(),
+      howMany,
+      None,
+      Some(Json.obj("createdAt" -> -1)),
+      Some(Json.obj("bazzes" -> 0)) // Drop this heavyweight array - saves a lot of latency
+    )   
+  }
+  
+  // Find documents that have a 'bar' value of "Cat" OR "Dog"
+  def listCatsAndDogs: Future[Seq[ExampleEntity]] = {
+  
+    // Create a MongoDB '$or' using standard Play JSON:
+    val catsOrDogsQuery = Json.obj(
+      "$or" -> Json.arr (
+        Json.obj ("bar" -> JsString("Cat")),
+        Json.obj ("bar" -> JsString("Dog"))
+      )
+    )
+    
+    listWhere(catsOrDogsQuery)
+  }
+  
+  
 ```
 
 ## Credits
