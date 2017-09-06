@@ -209,7 +209,7 @@ class VehicleService extends TypedMongoService[Vehicle]("vehicles")(VehicleJson.
 ## Examples
 For an entity defined as:
 
-```
+```scala
 case class ExampleEntity (
   _id: Option[MongoId],
   createdAt: DateTime,
@@ -221,7 +221,7 @@ case class ExampleEntity (
 ```
 Here's how some common service operations might look:
 
-```
+```scala
 class ExampleEntityService @Inject() (val reactiveMongoApi:ReactiveMongoApi)
   extends TypedMongoService[ExampleEntity]("exampleEntities") {
 
@@ -249,7 +249,7 @@ class ExampleEntityService @Inject() (val reactiveMongoApi:ReactiveMongoApi)
     
     listWhere(catsOrDogsQuery)
   }
-  
+} 
   
 ```
 
