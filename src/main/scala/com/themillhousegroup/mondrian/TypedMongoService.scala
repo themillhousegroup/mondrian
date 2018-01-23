@@ -1,8 +1,6 @@
 package com.themillhousegroup.mondrian
 
-import javax.inject.Inject
-
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.libs.concurrent.Akka
 import reactivemongo.api._
 import play.modules.reactivemongo.json.collection._
@@ -19,14 +17,12 @@ import play.api.libs.iteratee.Enumerator
 import scala.concurrent.duration.FiniteDuration
 import akka.actor._
 
-abstract class TypedMongoService[T <: MongoEntity] @Inject() (actorSystem: ActorSystem) (collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
+abstract class TypedMongoService[T <: MongoEntity] (reactiveMongoApi:ReactiveMongoApi,
+                                                    actorSystem: ActorSystem,
+                                                    configuration: Configuration)
+                                                   (collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
   private val logger = Logger(classOf[TypedMongoService[T]])
-  /**
-    *
-    * `@Inject()` this into your instance in the normal Play DI way
-    */
-  val reactiveMongoApi:ReactiveMongoApi
 
   /** The level of write concern to use for this collection; if not overridden, this will be the
     * ReactiveMongo connection-wide level as defined in MongoConnectionOptions - which can be globally set
@@ -34,6 +30,10 @@ abstract class TypedMongoService[T <: MongoEntity] @Inject() (actorSystem: Actor
     * unacknowledged / acknowledged / journaled / default
     */
   lazy val defaultWriteConcern = reactiveMongoApi.db.connection.options.writeConcern
+
+  // How long to wait before retrying a saveAndPopulate query when we can't find the object we just persisted...
+  lazy val retryDelayMillis = configuration.getInt("mondrian.retry.delay.ms").getOrElse(100)
+  lazy val delayDuration = FiniteDuration(retryDelayMillis, scala.concurrent.duration.MILLISECONDS)
 
   def cursorWhere(jsQuery: JsValue,
                   size: Option[Int] = None,
@@ -180,13 +180,6 @@ abstract class TypedMongoService[T <: MongoEntity] @Inject() (actorSystem: Actor
   }
 
   // If we've found no objects, try again
-  // FIXME: Allow this to be configured.
-  // We should allow injection of a Configuration object
-  // to control this
-
-  val retryDelayMillis = 100
-  lazy val delayDuration = FiniteDuration(retryDelayMillis, scala.concurrent.duration.MILLISECONDS)
-
   def findSingleObjectWithRetry(candidates: Seq[T], exampleJson:JsValue):Future[Option[T]] = {
     candidates.headOption.fold {
 
