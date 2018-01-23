@@ -17,10 +17,14 @@ import play.api.libs.iteratee.Enumerator
 import scala.concurrent.duration.FiniteDuration
 import akka.actor._
 
-abstract class TypedMongoService[T <: MongoEntity] (reactiveMongoApi:ReactiveMongoApi,
-                                                    actorSystem: ActorSystem,
-                                                    configuration: Configuration)
-                                                   (collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
+abstract class TypedMongoService[T <: MongoEntity] (collectionName: String)(implicit val fmt: Format[T]) extends MongoService(collectionName) {
+
+  /**
+    * You should `@Inject()` these dependencies to your Service in the normal Play way
+    */
+  val reactiveMongoApi:ReactiveMongoApi
+  val actorSystem: ActorSystem
+  val configuration: Configuration
 
   private val logger = Logger(classOf[TypedMongoService[T]])
 
