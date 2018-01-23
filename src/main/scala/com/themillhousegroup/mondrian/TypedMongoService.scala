@@ -1,5 +1,6 @@
 package com.themillhousegroup.mondrian
 
+import play.api.Logger
 import reactivemongo.api._
 import play.modules.reactivemongo.json.collection._
 import play.modules.reactivemongo._
@@ -14,6 +15,7 @@ import play.api.libs.iteratee.Enumerator
 
 abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
+  private val logger = Logger(classOf[TypedMongoService])
   /**
     *
     * `@Inject()` this into your instance in the normal Play DI way
@@ -149,16 +151,18 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
   def saveAndPopulate(obj: T): Future[Option[T]] = {
     save(obj).flatMap { ok =>
       if (ok) {
+        logger.debug(s"Save of $obj was OK; retrieving the object to determine its ID")
         val json = Json.toJson(obj)(fmt)
-        //findOne(json)
-		listWhere(json).map { results =>
-			if (results.size < 2) {
-				results.headOption
-			} else {
-        findMostRecentlyInsertedObject(results)
-			}
-		}
+		    listWhere(json).map { results =>
+            logger.trace(s"Found ${results.size} candidate object(s) for $obj")
+          if (results.size < 2) {
+            results.headOption
+          } else {
+            findMostRecentlyInsertedObject(results)
+          }
+        }
       } else {
+        logger.warn(s"Save of $obj was NOT OK.")
         Future.successful(None)
       }
     }
@@ -167,6 +171,7 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
   // There are multiple objects that look like the one
   // we have saved and so we need to "try harder" to find the new one..
   private def findMostRecentlyInsertedObject(candidates:Seq[T]):Option[T] = {
+    logger.debug(s"Sorting $candidates to find the most recent")
     candidates.sortBy { candidate =>
       candidate._id.getOrElse(MongoId.dummyMongoId)
     }.lastOption
