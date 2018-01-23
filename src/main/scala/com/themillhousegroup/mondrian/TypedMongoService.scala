@@ -15,7 +15,7 @@ import play.api.libs.iteratee.Enumerator
 
 abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
-  private val logger = Logger(classOf[TypedMongoService])
+  private val logger = Logger(classOf[TypedMongoService[T]])
   /**
     *
     * `@Inject()` this into your instance in the normal Play DI way
@@ -137,7 +137,12 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     }
 
     op.map { err =>
-      err.ok
+      val ok = err.ok
+
+      if (!ok) {
+        logger.error(s"Save of $obj NOT OK: code ${err.code}; errors: ${err.writeErrors.map(we => we.errmsg)}")
+      }
+      ok
     }
   }
 
