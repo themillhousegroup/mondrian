@@ -253,6 +253,15 @@ class ExampleEntityService @Inject() (val reactiveMongoApi:ReactiveMongoApi)
   
 ```
 
+## Logging
+
+Add the following to your `logback.xml` to enable the maximum level of logging in Mondrian. In particular you'll see the gory details of the `save` and `saveAndPopulate` functions, which might help in debugging issues with persistence:
+
+```
+<logger name="com.themillhousegroup.mondrian" level="TRACE" />
+```
+
+
 ## Credits
 
 - [Play-ReactiveMongo](https://github.com/ReactiveMongo/Play-ReactiveMongo) does the hard work.
