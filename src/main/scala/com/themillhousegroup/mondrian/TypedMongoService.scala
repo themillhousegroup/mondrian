@@ -1,19 +1,25 @@
 package com.themillhousegroup.mondrian
 
+import javax.inject.Inject
+
 import play.api.Logger
+import play.api.libs.concurrent.Akka
 import reactivemongo.api._
 import play.modules.reactivemongo.json.collection._
 import play.modules.reactivemongo._
 import play.modules.reactivemongo.json._
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import play.api.libs.json._
 import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.language.existentials
 import play.api.libs.iteratee.Enumerator
 
-abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
+import scala.concurrent.duration.FiniteDuration
+import akka.actor._
+
+abstract class TypedMongoService[T <: MongoEntity] @Inject() (actorSystem: ActorSystem) (collectionName: String)(implicit val fmt:Format[T]) extends MongoService(collectionName) {
 
   private val logger = Logger(classOf[TypedMongoService[T]])
   /**
@@ -158,10 +164,10 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
       if (ok) {
         logger.debug(s"Save of $obj was OK; retrieving the object to determine its ID")
         val json = Json.toJson(obj)(fmt)
-		    listWhere(json).map { results =>
-            logger.trace(s"Found ${results.size} candidate object(s) for $obj")
+		    listWhere(json).flatMap { results =>
+          logger.trace(s"Found ${results.size} candidate object(s) for $obj")
           if (results.size < 2) {
-            results.headOption
+            findSingleObjectWithRetry(results, json)
           } else {
             findMostRecentlyInsertedObject(results)
           }
@@ -173,9 +179,39 @@ abstract class TypedMongoService[T <: MongoEntity](collectionName: String)(impli
     }
   }
 
+  // If we've found no objects, try again
+  // FIXME: Allow this to be configured.
+  // We should allow injection of a Configuration object
+  // to control this
+
+  val retryDelayMillis = 100
+  lazy val delayDuration = FiniteDuration(retryDelayMillis, scala.concurrent.duration.MILLISECONDS)
+
+  def findSingleObjectWithRetry(candidates: Seq[T], exampleJson:JsValue):Future[Option[T]] = {
+    candidates.headOption.fold {
+
+      val promise = Promise[Option[T]]
+
+      logger.debug(s"We didn't find any persisted objects like $exampleJson - will try again in $retryDelayMillis ms")
+      actorSystem.scheduler.scheduleOnce(delayDuration) {
+        val fRetriedResult = findOne(exampleJson)
+
+        fRetriedResult.map { retriedResult =>
+          logger.debug(s"Result of retried query: $retriedResult")
+          retriedResult
+        }
+
+        promise.completeWith(fRetriedResult)
+      }
+
+      promise.future
+    } (first => Future.successful(Some(first)))
+  }
+
+
   // There are multiple objects that look like the one
   // we have saved and so we need to "try harder" to find the new one..
-  private def findMostRecentlyInsertedObject(candidates:Seq[T]):Option[T] = {
+  private def findMostRecentlyInsertedObject(candidates:Seq[T]):Future[Option[T]] = Future.successful {
     logger.debug(s"Sorting $candidates to find the most recent")
     candidates.sortBy { candidate =>
       candidate._id.getOrElse(MongoId.dummyMongoId)
