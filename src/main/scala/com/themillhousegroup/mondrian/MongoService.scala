@@ -8,10 +8,13 @@ import scala.language.existentials
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json._
 import play.modules.reactivemongo.ReactiveMongoApi
+import play.api.Logger
 
 abstract class MongoService(collectionName: String) {
 
   val reactiveMongoApi:ReactiveMongoApi
+
+  private val logger = Logger(classOf[MongoService])
 
   implicit val defaultContext = play.api.libs.concurrent.Execution.defaultContext
 
@@ -57,6 +60,8 @@ abstract class MongoService(collectionName: String) {
     * @return true iff the operation succeeded AND exactly one object was deleted
     */
   def deleteById(id: String): Future[Boolean] = deleteWhereAndCount(idSelector(id)).map { case (ok, n) =>
-    ok && n == 1
+    val deletedExactlyOne = ok && n == 1
+    logger.trace(s"Deletion status: OK: $ok Number actually deleted: $n; So returning $deletedExactlyOne")
+    deletedExactlyOne
   }
 }

@@ -140,8 +140,10 @@ abstract class TypedMongoService[T <: MongoEntity] (collectionName: String)(impl
     val json = Json.toJson(obj)(fmt).as[JsObject]
 
     val op = obj._id.fold {
+      logger.trace("Object $obj has no _id; inserting it")
       theCollection.insert(json, defaultWriteConcern)
     } { id =>
+      logger.trace("Object $obj has _id: $id; updating it")
       val selector = idSelector(id.$oid)
       theCollection.update(selector, json, defaultWriteConcern, true)
     }
