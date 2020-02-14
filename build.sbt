@@ -1,24 +1,26 @@
 name := "mondrian"
 
 // If the CI supplies a "build.version" environment variable, inject it as the rev part of the version number:
-version := s"${sys.props.getOrElse("build.majorMinor", "0.7")}.${sys.props.getOrElse("build.version", "SNAPSHOT")}"
+version := s"${sys.props.getOrElse("build.majorMinor", "0.8")}.${sys.props.getOrElse("build.version", "SNAPSHOT")}"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.10"
 
 organization := "com.themillhousegroup"
 
-val targetPlayReactiveMongoVersion = "0.12.5-play25"
+val targetPlayReactiveMongoVersion = "0.12.6-play26" 
 
-val targetPlayVersion = "2.5.12"
+val targetPlayVersion = "2.6.12"
 
-val minimumSpecs2Version = "[3.6,)"
+val minimumSpecs2Version = "[4.8.3,)"
 
 libraryDependencies ++= Seq(
     "org.reactivemongo"       %%    "play2-reactivemongo"       % targetPlayReactiveMongoVersion,
     "com.typesafe.play"       %%    "play"                      % targetPlayVersion                             % "provided",
     "com.typesafe.play"       %%    "play-cache"                % targetPlayVersion                             % "provided",
+    "com.typesafe.play"       %%    "play-json"                 % targetPlayVersion                             % "provided",
     "org.mockito"             %     "mockito-all"               % "1.10.19"                                     % "test",
-    "org.specs2"              %%    "specs2"                    % minimumSpecs2Version                          % "test"
+    "org.specs2"              %%    "specs2-core"               % minimumSpecs2Version                          % "test",
+		"org.specs2"              %%  	"specs2-mock"           		% minimumSpecs2Version      										% "test"
 )
 
 resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",

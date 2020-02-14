@@ -31,6 +31,12 @@ libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.4.61"
 libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.6.76"
 ```
 
+##### For Play 2.6.x (and Reactive Mongo 0.12.6):
+
+```scala
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.8.1"
+```
+
 ## Usage
 
 Once you have __mondrian__ added to your Play project, you can start using it like this:
