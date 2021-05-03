@@ -17,8 +17,11 @@
 //addSbtPlugin("me.lessis" % "bintray-sbt" % "0.1.2")
 //
 
-addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.1")
+// addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.1")
 
 
 // Uncomment if this is a Scala 2.11(+) project to get scapegoat linting:
 // addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "0.94.6")
+
+
+addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.7")

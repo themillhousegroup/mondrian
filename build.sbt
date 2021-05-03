@@ -1,11 +1,12 @@
 name := "mondrian"
 
-// If the CI supplies a "build.version" environment variable, inject it as the rev part of the version number:
-version := s"${sys.props.getOrElse("build.majorMinor", "0.8")}.${sys.props.getOrElse("build.version", "SNAPSHOT")}"
+organization := "com.themillhousegroup"
+
+developers := List(
+  Developer(id="themillhousegroup", name="John Marshall", email="john@themillhousegroup.com", url=url("http://www.themillhousegroup.com"))
+)
 
 scalaVersion := "2.12.10"
-
-organization := "com.themillhousegroup"
 
 val targetPlayReactiveMongoVersion = "0.12.6-play26" 
 
@@ -23,16 +24,13 @@ libraryDependencies ++= Seq(
 		"org.specs2"              %%  	"specs2-mock"           		% minimumSpecs2Version      										% "test"
 )
 
-resolvers ++= Seq(  "oss-snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-                    "oss-releases" at "https://oss.sonatype.org/content/repositories/releases",
-										"Millhouse Bintray" at "http://dl.bintray.com/themillhousegroup/maven",
-                    "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/")
-
-// jacoco.settings
-
-// seq(bintraySettings:_*)
-
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
 // net.virtualvoid.sbt.graph.Plugin.graphSettings
+
+// For all Sonatype accounts created on or after February 2021
+sonatypeCredentialHost := "s01.oss.sonatype.org"
+
+// Only for non-SNAPSHOT releases
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
