@@ -6,6 +6,8 @@ developers := List(
   Developer(id="themillhousegroup", name="John Marshall", email="john@themillhousegroup.com", url=url("http://www.themillhousegroup.com"))
 )
 
+homepage := Some(url("https://github.com/themillhousegroup/mondrian"))
+
 scalaVersion := "2.12.10"
 
 val targetPlayReactiveMongoVersion = "0.12.6-play26" 

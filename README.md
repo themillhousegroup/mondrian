@@ -11,7 +11,7 @@ Bring in the library by adding the following to your Play project's ```build.sbt
 ##### For Scala 2.12 & Play 2.6.x (and Reactive Mongo 0.12.6):
 
 ```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.9.0"
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.9.1"
 ```
 
 ## Usage
