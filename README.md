@@ -6,35 +6,12 @@ An extra layer supplying the classic CRUD operations for Play-ReactiveMongo obje
 
 ## Installation
 
-Bring in the library by adding the following to your Play project's ```build.sbt```. 
-The release repository: 
+Bring in the library by adding the following to your Play project's ```build.sbt```.
+
+##### For Scala 2.12 & Play 2.6.x (and Reactive Mongo 0.12.6):
 
 ```scala
-resolvers += "Millhouse Bintray" at "http://dl.bintray.com/themillhousegroup/maven"
-```
-And the dependency itself: 
-
-##### For Play 2.4.x:
-
-```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.2.21"
-```
-##### For Play 2.5.x (and Reactive Mongo 0.11.x):
-
-```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.4.61"
-```
-
-##### For Play 2.5.x (and Reactive Mongo 0.12.5):
-
-```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.6.76"
-```
-
-##### For Play 2.6.x (and Reactive Mongo 0.12.6):
-
-```scala
-libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.8.1"
+libraryDependencies += "com.themillhousegroup" %% "mondrian" % "0.9.0"
 ```
 
 ## Usage
